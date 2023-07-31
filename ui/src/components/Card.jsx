@@ -26,10 +26,10 @@ export default React.memo(function Card({ index, movieData, isLiked = false }) {
         setEmail(currentUser.email);
       } else navigate("/login");
     });
-
+//ch
     const addToList = async () => {
       try {
-        await axios.post("http://localhost:5000/api/user/add", {
+        await axios.post("https://flixxit-backend-yetg.onrender.com/api/user/add", {
           email,
           data: movieData,
         })
