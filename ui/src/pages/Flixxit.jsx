@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import Navbar from '../components/Navbar';
 import styled from "styled-components";
 import backgroundImage from "../assets/home.jpg";
-import MovieLogo from '../assets/homeTitle.webp';
+import MovieLogo from '../assets/homeTitle.png';
 import { FaPlay} from 'react-icons/fa';
 import { AiOutlineInfoCircle } from 'react-icons/ai';
 import { useNavigate } from 'react-router-dom';

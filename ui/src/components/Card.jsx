@@ -10,6 +10,8 @@ import {BiChevronDown} from "react-icons/bi";
 import { onAuthStateChanged } from 'firebase/auth';
 import { firebaseAuth } from '../utils/firebase-config';
 import axios from 'axios';
+import { useDispatch } from 'react-redux';
+import { removeMovieFromLiked } from '../store';
 // import { useDispatch } from "react-redux";
 
 export default React.memo(function Card({ index, movieData, isLiked = false }) {
@@ -18,7 +20,7 @@ export default React.memo(function Card({ index, movieData, isLiked = false }) {
     const [email, setEmail] = useState(undefined);
 
     const navigate = useNavigate();
-    // const dispatch = useDispatch();
+    const dispatch = useDispatch();
     
 
     onAuthStateChanged(firebaseAuth, (currentUser) => {
@@ -26,7 +28,7 @@ export default React.memo(function Card({ index, movieData, isLiked = false }) {
         setEmail(currentUser.email);
       } else navigate("/login");
     });
-//ch
+//channel
     const addToList = async () => {
       try {
         await axios.post("https://flixxit-backend-yetg.onrender.com/api/user/add", {
@@ -79,7 +81,11 @@ export default React.memo(function Card({ index, movieData, isLiked = false }) {
                 <RiThumbUpFill title="Like" />
                 <RiThumbDownFill title="Dislike" />
                 {isLiked ? (
-                  <BsCheck title="Remove from List" />
+                  <BsCheck title="Remove from List" onClick={() =>
+                      dispatch(
+                        removeMovieFromLiked({ movieId: movieData.id, email })
+                      )
+                    }/>
                 ) : (
                   <AiOutlinePlus title="Add to my list" onClick={addToList} />
                 )}
