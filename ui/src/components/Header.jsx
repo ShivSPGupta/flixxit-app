@@ -11,21 +11,21 @@ export default function Header(props) {
         <img src={logo} alt='logo' />
       </div>
       <button onClick={() => navigate(props.login ? "/login" : "/signup")}>
-        {props.login ? "Log In" : "Sign In"}
+        {props.login ? "Log In" : "Sign Up"}
       </button>
     </Container>
   )
 }
 
 const Container = styled.div`
-padding: 0 4rem;
+padding: 1rem 4rem;
 .logo {
   img {
     height: 5rem;
   }
 }
 button {
-  padding: 0.5rem 1rem;
+  padding: 0.6rem 1rem;
   background-color: #e50914;
   border: none;
   cursor: pointer;

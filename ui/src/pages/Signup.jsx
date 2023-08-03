@@ -7,7 +7,7 @@ import { firebaseAuth } from '../utils/firebase-config';
 import { useNavigate } from 'react-router-dom';
 
 export default function Signup() {
-  const [ showPassword, setShowPassword]= useState(false);
+  const [showPassword, setShowPassword]= useState(false);
   const [formValues, setFormValues] = useState({
     email: "",
     password: "",
@@ -28,6 +28,7 @@ export default function Signup() {
     if(currentUser) navigate("/");
   });
 
+  
   return (
     <Container showPassword={showPassword}>
       <BackgroundImage />
@@ -36,7 +37,7 @@ export default function Signup() {
         <div className="body flex column a-center j-center">
           <div className="text flex column">
             <h1>Unlimited movies, TV shows and more.</h1>
-            <h4>Watch anywhere. Cancel anytime.</h4>
+            <h4>Watch anywhere, anytime.</h4>
             <h6>
               Ready to watch? Enter your email to create or restart membership.
             </h6>
@@ -75,7 +76,7 @@ export default function Signup() {
             )}
             
           </div>
-          {showPassword && <button onClick={handleSignIn}>Log In</button>}
+          {showPassword && <button onClick={handleSignIn}>Sign Up</button>}
         </div>
         </div>
     </Container>

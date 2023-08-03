@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import styled from "styled-components";
 import logo from "../assets/logo.png";
 import { Link, useNavigate } from "react-router-dom";
-import {FaPowerOff,FaSearch} from "react-icons/fa";
+import {FaCheck, FaSearch, FaSignOutAlt, FaTimes} from "react-icons/fa";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { firebaseAuth } from '../utils/firebase-config';
+
 
 
 export default function Navbar({ isScrolled }) {
@@ -24,6 +25,26 @@ export default function Navbar({ isScrolled }) {
 
       const [showSearch, setShowSearch] = useState(false);
       const [inputHover, setInputHover] = useState(false);
+
+      const [showConfirmation, setShowConfirmation] = useState(false);
+
+  const handleLogout = () => {
+    setShowConfirmation(true);
+  };
+
+  const handleConfirmLogout = () => {
+    // SignOut Firebase
+    signOut(firebaseAuth)
+    console.log('Logged out successfully!');
+    setShowConfirmation(false);
+  };
+
+  const handleCancelLogout = () => {
+    setShowConfirmation(false);
+  };
+    
+
+
 
   return (
     <Container>
@@ -65,9 +86,21 @@ export default function Navbar({ isScrolled }) {
               }}
             />
           </div>
-          <button onClick={() => signOut(firebaseAuth) }>
-            <FaPowerOff />
+          <button onClick={handleLogout}>
+            <FaSignOutAlt/>
           </button>
+        {showConfirmation && (
+          <div>
+            <p>Are you sure you want to logout?</p>
+            <button onClick={handleConfirmLogout}>
+            <FaCheck/>
+            </button>
+            <button onClick={handleCancelLogout}>
+            <FaTimes/>
+            </button>
+          </div>
+        )}
+          
         </div>
       </nav>
     </Container>

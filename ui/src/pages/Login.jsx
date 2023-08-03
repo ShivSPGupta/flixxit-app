@@ -37,7 +37,7 @@ export default function Login() {
       <div className="form-container flex column a-center j-center">
         <div className="form flex column a-center j-center">
           <div className="title">
-            <h3>Login</h3>
+            <h1>Login</h1>
           </div>
           <div className="container flex column">
           <input
@@ -87,16 +87,18 @@ position: relative;
     gap: 2rem;
     height: 85vh;
     .form {
-      padding: 2rem;
+      padding: 4rem;
       background-color: #000000b0;
-      width: 25vw;
+      width: 35vw;
       gap: 2rem;
       color: white;
       .container {
         gap: 2rem;
         input {
-          padding: 0.5rem 1rem;
-          width: 15rem;
+          padding: 0.8rem 1rem;
+          width: 20rem;
+          font-weight: bolder;
+          font-size: 1rem;
         }
         button {
           padding: 0.5rem 1rem;

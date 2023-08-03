@@ -1,5 +1,5 @@
-import React from 'react'
-import CardSlider from './CardSlider'
+import React from 'react';
+import CardSlider from './CardSlider';
 
 export default function Slider({movies}) {
     const getMoviesFromRange =(from, to) =>{

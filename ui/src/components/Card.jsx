@@ -12,7 +12,7 @@ import { firebaseAuth } from '../utils/firebase-config';
 import axios from 'axios';
 import { useDispatch } from 'react-redux';
 import { removeMovieFromLiked } from '../store';
-// import { useDispatch } from "react-redux";
+
 
 export default React.memo(function Card({ index, movieData, isLiked = false }) {
 
