@@ -1,6 +1,6 @@
 import { configureStore, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { API_KEY, TMBD_BASE_URL } from '../utils/constants';
-import axios from "axios";
+import axios from "axios"
 
 
 const initialState = {
