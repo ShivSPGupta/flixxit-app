@@ -3,7 +3,7 @@ import { initializeApp } from "firebase/app";
 
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAPDjchyPT0bkTRs4ByQq3FeYJT3xOHtac",
+  apiKey: process.env.REACT_APP_FIRE_API_KEY,
   authDomain: "flixxit-capsproj.firebaseapp.com",
   projectId: "flixxit-capsproj",
   storageBucket: "flixxit-capsproj.appspot.com",
