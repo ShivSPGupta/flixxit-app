@@ -22,13 +22,13 @@ export default function Movies() {
 
     useEffect(() => {
     dispatch(getGenres());
-    }, []);
+    }, [dispatch]);
 
     useEffect(() => {
     if (genresLoaded) {
       dispatch(fetchMovies({ type: "movie" }));
     }
-    }, [genresLoaded]);
+    }, [dispatch, genresLoaded]);
 
     const [user, setUser] = useState(undefined);
 
@@ -38,7 +38,7 @@ export default function Movies() {
     });
 
     window.onscroll = () => {
-    setIsScrolled(window.pageYOffset === 0 ? false : true);
+    setIsScrolled(window.scrollY === 0 ? false : true);
     return () => (window.onscroll = null);
   };
 

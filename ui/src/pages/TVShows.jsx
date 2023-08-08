@@ -21,24 +21,26 @@ export default function TVShows() {
     const dispatch = useDispatch();
 
     useEffect(() => {
-    dispatch(getGenres());
-    }, []);
+      if (!genres.length) dispatch(getGenres());
+    }, [dispatch, genres.length]);
 
     useEffect(() => {
     if (genresLoaded) {
-      dispatch(fetchMovies({ type: "tv" }));
+      dispatch(fetchMovies({ genres,type: "tv" }));
     }
-    }, [genresLoaded]);
+    }, [dispatch, genres, genresLoaded]);
 
     window.onscroll = () => {
-    setIsScrolled(window.pageYOffset === 0 ? false : true);
+    setIsScrolled(window.scrollY === 0 ? false : true);
     return () => (window.onscroll = null);
   };
+  
+  const [user, setUser] = useState(undefined);
 
   onAuthStateChanged(firebaseAuth, (currentUser)=> {
-    // if(currentUser) navigate("/");
-    
-  })
+    if (currentUser) setUser(currentUser.uid);
+    else navigate("/login");
+  });
 
   return (
     <Container>

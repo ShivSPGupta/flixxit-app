@@ -3,11 +3,14 @@ const cors = require('cors');
 const mongoose = require("mongoose");
 const userRoutes = require("./routes/UserRoutes");
 const app = express();
+require("dotenv").config({path: '../config.env'});
+
 
 app.use(cors());
 app.use(express.json());
 
-const dbUrl = "mongodb+srv://sspgupta11:VbGEzITde0eKru3q@cluster0.tmwxxjz.mongodb.net/flixxitapi?retryWrites=true&w=majority";
+const PORT = process.env.ENV_PORT;
+const dbUrl = process.env.ENV_MONGODB;
 const connectionParams = {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -23,6 +26,6 @@ mongoose.connect( dbUrl, connectionParams )
 
 app.use("/api/user", userRoutes);
 
-app.listen(5000, ()=> {
-    console.log("server started on port 5000");
+app.listen(PORT, ()=> {
+    console.log('Server started on port ', {PORT});
 });
