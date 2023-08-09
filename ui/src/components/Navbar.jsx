@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from "styled-components";
 import logo from "../assets/logo.png";
 import { Link, useNavigate } from "react-router-dom";
@@ -19,13 +19,10 @@ export default function Navbar({ isScrolled }) {
 
       const navigate = useNavigate();
 
-      onAuthStateChanged(firebaseAuth, (currentUser)=> {
-        if(!currentUser) navigate("/login");
-      })
 
-      // const [showSearch, setShowSearch] = useState(false);
-      // const [inputHover, setInputHover] = useState(false);
-      //Working for Search
+      const [user, setUser] = useState(null);
+
+      
     
 
       const [showConfirmation, setShowConfirmation] = useState(false);
@@ -44,7 +41,20 @@ export default function Navbar({ isScrolled }) {
   const handleCancelLogout = () => {
     setShowConfirmation(false);
   };
-    
+
+  //User Login Info
+  useEffect(() => {
+    // Set up an authentication state listener
+    const unsubscribe = onAuthStateChanged(firebaseAuth, (currentUser) => {
+      if (currentUser) {
+        setUser(currentUser);
+      } else {
+        setUser(null);
+        navigate("/login");
+      }
+    });
+    return () => unsubscribe(); // Clean up the listener on unmount
+  }, [navigate]);
 
 
 
@@ -66,29 +76,11 @@ export default function Navbar({ isScrolled }) {
           </ul>
         </div>
         <div className="right flex a-center">
-      
-          {/* <div className={`search ${showSearch ? "show-search" : ""}`}>
-            <button
-              onFocus={() => setShowSearch(true)}
-              onBlur={() => {
-                if (!inputHover) {
-                  setShowSearch(false);
-                }
-              }}
-            >
-              <FaSearch />
-            </button>
-            <input
-              type="text"
-              placeholder="Search"
-              onMouseEnter={() => setInputHover(true)}
-              onMouseLeave={() => setInputHover(false)}
-              onBlur={() => {
-                setShowSearch(false);
-                setInputHover(false);
-              }}
-            />
-          </div> */}
+        {user && (
+            <div className="user-info">
+              <p>Welcome, {user.email}</p>
+            </div>
+          )}
         
           <button onClick={handleLogout}>
             <FaSignOutAlt/>
