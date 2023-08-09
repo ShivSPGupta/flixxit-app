@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import styled from "styled-components";
 import logo from "../assets/logo.png";
 import { Link, useNavigate } from "react-router-dom";
-import {FaCheck, FaSearch, FaSignOutAlt, FaTimes} from "react-icons/fa";
+import {FaCheck, FaSignOutAlt, FaTimes} from "react-icons/fa";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { firebaseAuth } from '../utils/firebase-config';
 
@@ -23,8 +23,10 @@ export default function Navbar({ isScrolled }) {
         if(!currentUser) navigate("/login");
       })
 
-      const [showSearch, setShowSearch] = useState(false);
-      const [inputHover, setInputHover] = useState(false);
+      // const [showSearch, setShowSearch] = useState(false);
+      // const [inputHover, setInputHover] = useState(false);
+      //Working for Search
+    
 
       const [showConfirmation, setShowConfirmation] = useState(false);
 
@@ -64,7 +66,8 @@ export default function Navbar({ isScrolled }) {
           </ul>
         </div>
         <div className="right flex a-center">
-          <div className={`search ${showSearch ? "show-search" : ""}`}>
+      
+          {/* <div className={`search ${showSearch ? "show-search" : ""}`}>
             <button
               onFocus={() => setShowSearch(true)}
               onBlur={() => {
@@ -85,7 +88,8 @@ export default function Navbar({ isScrolled }) {
                 setInputHover(false);
               }}
             />
-          </div>
+          </div> */}
+        
           <button onClick={handleLogout}>
             <FaSignOutAlt/>
           </button>
