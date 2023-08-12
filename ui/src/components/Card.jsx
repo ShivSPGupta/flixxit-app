@@ -4,8 +4,7 @@ import styled from 'styled-components';
 import video from "../assets/video.mp4";
 import {IoPlayCircleSharp} from "react-icons/io5";
 import {RiThumbUpFill, RiThumbDownFill} from "react-icons/ri";
-import {BsCheck} from "react-icons/bs";
-import {AiOutlinePlus} from "react-icons/ai";
+import {AiOutlineClose, AiOutlinePlus} from "react-icons/ai";
 import {BiChevronDown} from "react-icons/bi";
 import { onAuthStateChanged } from 'firebase/auth';
 import { firebaseAuth } from '../utils/firebase-config';
@@ -81,7 +80,7 @@ export default React.memo(function Card({ index, movieData, isLiked = false }) {
                 <RiThumbUpFill title="Like" />
                 <RiThumbDownFill title="Dislike" />
                 {isLiked ? (
-                  <BsCheck title="Remove from List" onClick={() =>
+                  <AiOutlineClose title="Remove from List" onClick={() =>
                       dispatch(
                         removeMovieFromLiked({ movieId: movieData.id, email })
                       )
