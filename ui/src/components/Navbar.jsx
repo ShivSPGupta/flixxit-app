@@ -22,8 +22,6 @@ export default function Navbar({ isScrolled }) {
 
       const [user, setUser] = useState(null);
 
-      
-    
 
       const [showConfirmation, setShowConfirmation] = useState(false);
 
