@@ -16,7 +16,7 @@ connectDB();
 app.use(helmet());
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? 'your-frontend-url.vercel.app' 
+    ? 'https://flixxit-app.vercel.app/' 
     : 'http://localhost:5173',
   credentials: true
 }));
