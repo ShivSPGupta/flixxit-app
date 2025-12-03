@@ -34,7 +34,7 @@ const Navbar = () => {
       <div className="flex items-center justify-between px-4 md:px-12 py-4">
         <div className="flex items-center space-x-8">
           <Link to="/home" className="text-netflix text-3xl font-bold">
-            NETFLIX
+            FLIXXIT
           </Link>
           <div className="hidden md:flex space-x-6">
             <Link to="/home" className="hover:text-gray-300 transition">
