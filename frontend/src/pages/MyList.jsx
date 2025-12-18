@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { getFavorites, removeFromFavorites } from '../redux/slices/favoritesSlice';
@@ -12,6 +12,18 @@ const MyList = () => {
   useEffect(() => {
     dispatch(getFavorites());
   }, [dispatch]);
+
+  // Remove duplicates from favorites list
+  const uniqueList = useMemo(() => {
+    const seen = new Set();
+    return list.filter(movie => {
+      if (seen.has(movie.imdbID)) {
+        return false;
+      }
+      seen.add(movie.imdbID);
+      return true;
+    });
+  }, [list]);
 
   const handleRemove = (imdbID) => {
     dispatch(removeFromFavorites(imdbID));
@@ -28,9 +40,9 @@ const MyList = () => {
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
           </div>
-        ) : list.length > 0 ? (
+        ) : uniqueList.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-            {list.map((movie) => (
+            {uniqueList.map((movie) => (
               <div key={movie.imdbID} className="relative group">
                 <div
                   onClick={() => navigate(`/movie/${movie.imdbID}`)}

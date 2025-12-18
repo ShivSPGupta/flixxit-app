@@ -15,12 +15,15 @@ const Banner = () => {
     dispatch(getMovieRow({ keyword: 'trending' }));
   }, [dispatch]);
 
-  useEffect(() => {
-    if (rows.trending?.length > 0) {
-      const randomMovie = rows.trending[Math.floor(Math.random() * rows.trending.length)];
+useEffect(() => {
+  if (rows.trending?.length > 0) {
+    queueMicrotask(() => {
+      const randomMovie =
+        rows.trending[Math.floor(Math.random() * rows.trending.length)];
       setMovie(randomMovie);
-    }
-  }, [rows.trending]);
+    });
+  }
+}, [rows.trending]);
 
   const truncate = (str, n) => {
     return str?.length > n ? str.substr(0, n - 1) + '...' : str;

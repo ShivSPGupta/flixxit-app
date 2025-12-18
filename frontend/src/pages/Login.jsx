@@ -111,7 +111,7 @@ const Login = () => {
           
           <div className="mt-6 text-gray-400">
             <p>
-              New to flixxit?{' '}
+              New to Flixxit?{' '}
               <Link to="/register" className="text-white hover:underline">
                 Sign up now
               </Link>

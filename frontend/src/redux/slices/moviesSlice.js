@@ -56,10 +56,23 @@ export const getTrailer = createAsyncThunk(
       const response = await api.get(`/movies/trailer/${encodeURIComponent(title)}`);
       return response.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue('Trailer not found');
+      return thunkAPI.rejectWithValue(error,'Trailer not found');
     }
   }
 );
+
+// Helper function to remove duplicates
+const removeDuplicates = (movies) => {
+  if (!Array.isArray(movies)) return [];
+  const seen = new Set();
+  return movies.filter(movie => {
+    if (seen.has(movie.imdbID)) {
+      return false;
+    }
+    seen.add(movie.imdbID);
+    return true;
+  });
+};
 
 const moviesSlice = createSlice({
   name: 'movies',
@@ -79,7 +92,8 @@ const moviesSlice = createSlice({
       })
       .addCase(searchMovies.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.searchResults = action.payload.Search || [];
+        // Remove duplicates from search results
+        state.searchResults = removeDuplicates(action.payload.Search || []);
       })
       .addCase(searchMovies.rejected, (state, action) => {
         state.isLoading = false;
@@ -99,7 +113,9 @@ const moviesSlice = createSlice({
         state.message = action.payload;
       })
       .addCase(getMovieRow.fulfilled, (state, action) => {
-        state.rows[action.payload.keyword] = action.payload.data.Search || [];
+        // Remove duplicates before storing
+        const movies = action.payload.data.Search || [];
+        state.rows[action.payload.keyword] = removeDuplicates(movies);
       });
   },
 });

@@ -29,9 +29,13 @@ const Row = ({ title, keyword, isLarge = false }) => {
     }
   };
 
+  // FIXED: Remove duplicates based on imdbID
   const movies = rows[keyword] || [];
+  const uniqueMovies = movies.filter((movie, index, self) => 
+    index === self.findIndex((m) => m.imdbID === movie.imdbID)
+  );
 
-  if (!movies.length) return null;
+  if (!uniqueMovies.length) return null;
 
   return (
     <div className="py-4 px-4 md:px-12 relative group">
@@ -54,7 +58,7 @@ const Row = ({ title, keyword, isLarge = false }) => {
           onScroll={handleScroll}
           className="flex space-x-2 overflow-x-scroll scrollbar-hide scroll-smooth"
         >
-          {movies.map((movie) => (
+          {uniqueMovies.map((movie) => (
             <MovieCard key={movie.imdbID} movie={movie} isLarge={isLarge} />
           ))}
         </div>

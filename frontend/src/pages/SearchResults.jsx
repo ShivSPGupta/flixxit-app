@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { searchMovies } from '../redux/slices/moviesSlice';
@@ -17,6 +17,18 @@ const SearchResults = () => {
     }
   }, [query, dispatch]);
 
+  // Remove duplicates with useMemo for performance
+  const uniqueResults = useMemo(() => {
+    const seen = new Set();
+    return searchResults.filter(movie => {
+      if (seen.has(movie.imdbID)) {
+        return false;
+      }
+      seen.add(movie.imdbID);
+      return true;
+    });
+  }, [searchResults]);
+
   return (
     <div className="min-h-screen bg-black">
       <Navbar />
@@ -30,9 +42,9 @@ const SearchResults = () => {
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
           </div>
-        ) : searchResults.length > 0 ? (
+        ) : uniqueResults.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-            {searchResults.map((movie) => (
+            {uniqueResults.map((movie) => (
               <div
                 key={movie.imdbID}
                 onClick={() => navigate(`/movie/${movie.imdbID}`)}

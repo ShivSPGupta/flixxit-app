@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { logout } from '../redux/slices/authSlice';
-import SearchBar from './SearchBar';
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../redux/slices/authSlice";
+import SearchBar from "./SearchBar";
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -16,19 +16,19 @@ const Navbar = () => {
       setScrolled(window.scrollY > 50);
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const handleLogout = () => {
     dispatch(logout());
-    navigate('/login');
+    navigate("/login");
   };
 
   return (
     <nav
       className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        scrolled ? 'bg-black' : 'bg-gradient-to-b from-black to-transparent'
+        scrolled ? "bg-black" : "bg-gradient-to-b from-black to-transparent"
       }`}
     >
       <div className="flex items-center justify-between px-4 md:px-12 py-4">
@@ -44,11 +44,18 @@ const Navbar = () => {
               My List
             </Link>
           </div>
+
+          {/* Mobile Navigation - ONLY My List */}
+          <div className="flex md:hidden">
+            <Link to="/mylist" className="hover:text-gray-300 transition">
+              My List
+            </Link>
+          </div>
         </div>
 
         <div className="flex items-center space-x-4">
           <SearchBar />
-          
+
           <div className="relative">
             <button
               onClick={() => setShowMenu(!showMenu)}
@@ -61,7 +68,7 @@ const Navbar = () => {
               />
               <svg
                 className={`w-4 h-4 transition-transform ${
-                  showMenu ? 'rotate-180' : ''
+                  showMenu ? "rotate-180" : ""
                 }`}
                 fill="currentColor"
                 viewBox="0 0 20 20"
