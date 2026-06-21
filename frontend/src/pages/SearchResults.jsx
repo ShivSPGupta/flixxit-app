@@ -9,7 +9,7 @@ const SearchResults = () => {
   const query = searchParams.get('q');
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { searchResults, isLoading } = useSelector((state) => state.movies);
+  const { searchResults, search } = useSelector((state) => state.movies);
 
   useEffect(() => {
     if (query) {
@@ -38,7 +38,7 @@ const SearchResults = () => {
           Search results for "{query}"
         </h1>
         
-        {isLoading ? (
+        {search.isLoading ? (
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
           </div>

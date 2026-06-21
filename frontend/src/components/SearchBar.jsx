@@ -6,7 +6,6 @@ import { searchMovies, clearSearchResults } from '../redux/slices/moviesSlice';
 const SearchBar = () => {
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
-  const [showResults, setShowResults] = useState(false);
   const searchRef = useRef(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -15,7 +14,7 @@ const SearchBar = () => {
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
-        setShowResults(false);
+        setIsOpen(false);
       }
     };
 
@@ -27,20 +26,17 @@ const SearchBar = () => {
     if (query.length > 2) {
       const timeoutId = setTimeout(() => {
         dispatch(searchMovies(query));
-        setShowResults(true);
       }, 500);
 
       return () => clearTimeout(timeoutId);
     } else {
       dispatch(clearSearchResults());
-      setShowResults(false);
     }
   }, [query, dispatch]);
 
   const handleMovieClick = (imdbID) => {
     navigate(`/movie/${imdbID}`);
     setQuery('');
-    setShowResults(false);
     setIsOpen(false);
   };
 
@@ -48,10 +44,11 @@ const SearchBar = () => {
     e.preventDefault();
     if (query.trim()) {
       navigate(`/search?q=${encodeURIComponent(query)}`);
-      setShowResults(false);
       setIsOpen(false);
     }
   };
+
+  const showResults = isOpen && query.length > 2 && searchResults.length > 0;
 
   return (
     <div ref={searchRef} className="relative">

@@ -9,7 +9,7 @@ const MovieDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { movieDetail, isLoading } = useSelector((state) => state.movies);
+  const { movieDetail, detail } = useSelector((state) => state.movies);
   const { list } = useSelector((state) => state.favorites);
   const [playTrailer, setPlayTrailer] = useState(false);
 
@@ -20,7 +20,34 @@ const MovieDetail = () => {
     };
   }, [id, dispatch]);
 
-  if (isLoading || !movieDetail) {
+  if (detail.isError) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center px-4">
+        <div className="max-w-md w-full text-center">
+          <h1 className="text-3xl font-bold mb-4">Could not load this title</h1>
+          <p className="text-gray-400 mb-6">
+            {detail.message || 'Something went wrong while loading the movie details.'}
+          </p>
+          <div className="flex justify-center gap-3">
+            <button
+              onClick={() => dispatch(getMovieDetail(id))}
+              className="bg-white text-black px-5 py-2 rounded font-semibold hover:bg-gray-200 transition"
+            >
+              Try Again
+            </button>
+            <button
+              onClick={() => navigate('/home')}
+              className="bg-gray-700 text-white px-5 py-2 rounded font-semibold hover:bg-gray-600 transition"
+            >
+              Back Home
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (detail.isLoading || !movieDetail) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-white"></div>

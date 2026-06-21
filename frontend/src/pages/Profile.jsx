@@ -72,12 +72,17 @@ const Profile = () => {
     });
   };
 
-  const handleDeleteAccount = () => {
-    if (showDeleteConfirm) {
-      dispatch(deleteAccount());
-      navigate('/login');
-    } else {
+  const handleDeleteAccount = async () => {
+    if (!showDeleteConfirm) {
       setShowDeleteConfirm(true);
+      return;
+    }
+
+    try {
+      await dispatch(deleteAccount()).unwrap();
+      navigate('/login');
+    } catch (error) {
+      alert(error || 'Failed to delete account. Please try again.');
     }
   };
 

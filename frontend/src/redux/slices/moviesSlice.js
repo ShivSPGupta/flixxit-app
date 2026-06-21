@@ -5,9 +5,17 @@ const initialState = {
   searchResults: [],
   movieDetail: null,
   rows: {},
-  isLoading: false,
-  isError: false,
-  message: '',
+  rowStatus: {},
+  search: {
+    isLoading: false,
+    isError: false,
+    message: '',
+  },
+  detail: {
+    isLoading: false,
+    isError: false,
+    message: '',
+  },
 };
 
 export const searchMovies = createAsyncThunk(
@@ -46,6 +54,20 @@ export const getMovieRow = createAsyncThunk(
       const message = error.response?.data?.message || error.message;
       return thunkAPI.rejectWithValue(message);
     }
+  },
+  {
+    condition: ({ keyword, page = 1 }, { getState }) => {
+      if (!keyword) return false;
+
+      const { movies } = getState();
+      const isAlreadyLoaded =
+        page === 1 &&
+        Array.isArray(movies.rows[keyword]) &&
+        movies.rows[keyword].length > 0;
+      const isAlreadyLoading = movies.rowStatus[keyword] === 'loading';
+
+      return !isAlreadyLoaded && !isAlreadyLoading;
+    },
   }
 );
 
@@ -56,7 +78,9 @@ export const getTrailer = createAsyncThunk(
       const response = await api.get(`/movies/trailer/${encodeURIComponent(title)}`);
       return response.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error,'Trailer not found');
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || 'Trailer not found'
+      );
     }
   }
 );
@@ -80,42 +104,77 @@ const moviesSlice = createSlice({
   reducers: {
     clearSearchResults: (state) => {
       state.searchResults = [];
+      state.search.isError = false;
+      state.search.message = '';
     },
     clearMovieDetail: (state) => {
       state.movieDetail = null;
+      state.detail.isLoading = false;
+      state.detail.isError = false;
+      state.detail.message = '';
     },
   },
   extraReducers: (builder) => {
     builder
       .addCase(searchMovies.pending, (state) => {
-        state.isLoading = true;
+        state.search.isLoading = true;
+        state.search.isError = false;
+        state.search.message = '';
       })
       .addCase(searchMovies.fulfilled, (state, action) => {
-        state.isLoading = false;
+        state.search.isLoading = false;
+        state.search.isError = false;
+        state.search.message = '';
         // Remove duplicates from search results
         state.searchResults = removeDuplicates(action.payload.Search || []);
       })
       .addCase(searchMovies.rejected, (state, action) => {
-        state.isLoading = false;
-        state.isError = true;
-        state.message = action.payload;
+        state.search.isLoading = false;
+        state.search.isError = true;
+        state.search.message = action.payload;
       })
       .addCase(getMovieDetail.pending, (state) => {
-        state.isLoading = true;
+        state.detail.isLoading = true;
+        state.detail.isError = false;
+        state.detail.message = '';
       })
       .addCase(getMovieDetail.fulfilled, (state, action) => {
-        state.isLoading = false;
+        state.detail.isLoading = false;
+        state.detail.isError = false;
+        state.detail.message = '';
         state.movieDetail = action.payload;
       })
       .addCase(getMovieDetail.rejected, (state, action) => {
-        state.isLoading = false;
-        state.isError = true;
-        state.message = action.payload;
+        state.detail.isLoading = false;
+        state.detail.isError = true;
+        state.detail.message = action.payload;
+      })
+      .addCase(getMovieRow.pending, (state, action) => {
+        const keyword = action.meta?.arg?.keyword;
+        if (keyword) {
+          state.rowStatus[keyword] = 'loading';
+        }
+        state.search.isLoading = true;
+        state.search.isError = false;
+        state.search.message = '';
       })
       .addCase(getMovieRow.fulfilled, (state, action) => {
+        state.rowStatus[action.payload.keyword] = 'idle';
+        state.search.isLoading = false;
+        state.search.isError = false;
+        state.search.message = '';
         // Remove duplicates before storing
         const movies = action.payload.data.Search || [];
         state.rows[action.payload.keyword] = removeDuplicates(movies);
+      })
+      .addCase(getMovieRow.rejected, (state, action) => {
+        const keyword = action.meta?.arg?.keyword;
+        if (keyword) {
+          state.rowStatus[keyword] = 'idle';
+        }
+        state.search.isLoading = false;
+        state.search.isError = true;
+        state.search.message = action.payload;
       });
   },
 });

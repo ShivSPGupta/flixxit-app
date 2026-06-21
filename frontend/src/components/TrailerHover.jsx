@@ -1,23 +1,37 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
 
-const TrailerHover = ({ movie, onClose }) => {
+const TrailerHover = ({ movie }) => {
   const [trailerKey, setTrailerKey] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [trailerError, setTrailerError] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchTrailer = async () => {
       try {
         const response = await api.get(`/movies/trailer/${encodeURIComponent(movie.Title)}`);
-        setTrailerKey(response.data.trailerKey);
-      } catch (error) {
-        console.error('Failed to load trailer');
+        if (!cancelled) {
+          setTrailerKey(response.data.trailerKey);
+          setTrailerError(false);
+        }
+      } catch {
+        if (!cancelled) {
+          setTrailerKey(null);
+          setTrailerError(true);
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 
     fetchTrailer();
+    return () => {
+      cancelled = true;
+    };
   }, [movie.Title]);
 
   if (loading) {
@@ -31,7 +45,14 @@ const TrailerHover = ({ movie, onClose }) => {
   if (!trailerKey) {
     return (
       <div className="absolute inset-0 bg-black/90 flex items-center justify-center rounded z-20">
-        <p className="text-gray-400">No trailer available</p>
+        <div className="text-center px-4">
+          <p className="text-gray-200 font-medium">
+            {trailerError ? 'Trailer unavailable' : 'No trailer available'}
+          </p>
+          <p className="text-sm text-gray-400 mt-1">
+            We could not find a playable trailer for this title.
+          </p>
+        </div>
       </div>
     );
   }

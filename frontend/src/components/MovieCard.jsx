@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToFavorites, removeFromFavorites } from '../redux/slices/favoritesSlice';
@@ -6,23 +6,36 @@ import TrailerHover from './TrailerHover';
 
 const MovieCard = ({ movie, isLarge = false }) => {
   const [showTrailer, setShowTrailer] = useState(false);
-  const [hoverTimeout, setHoverTimeout] = useState(null);
+  const hoverTimeoutRef = useRef(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { list } = useSelector((state) => state.favorites);
+  const fallbackPoster = 'https://via.placeholder.com/200x300?text=No+Image';
+
+  useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const isInList = list.some(item => item.imdbID === movie.imdbID);
 
   const handleMouseEnter = () => {
-    const timeout = setTimeout(() => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
+
+    hoverTimeoutRef.current = setTimeout(() => {
       setShowTrailer(true);
     }, 800);
-    setHoverTimeout(timeout);
   };
 
   const handleMouseLeave = () => {
-    if (hoverTimeout) {
-      clearTimeout(hoverTimeout);
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+      hoverTimeoutRef.current = null;
     }
     setShowTrailer(false);
   };
@@ -55,14 +68,17 @@ const MovieCard = ({ movie, isLarge = false }) => {
       }}
     >
       <img
-        src={movie.Poster !== 'N/A' ? movie.Poster : 'https://via.placeholder.com/200x300?text=No+Image'}
+        src={movie.Poster !== 'N/A' ? movie.Poster : fallbackPoster}
         alt={movie.Title}
         onClick={handleClick}
+        onError={(e) => {
+          e.currentTarget.src = fallbackPoster;
+        }}
         className="w-full h-full object-cover rounded"
       />
       
       {showTrailer && (
-        <TrailerHover movie={movie} onClose={() => setShowTrailer(false)} />
+        <TrailerHover movie={movie} />
       )}
       
       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-3 opacity-0 hover:opacity-100 transition-opacity">

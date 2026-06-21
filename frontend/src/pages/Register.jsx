@@ -80,7 +80,11 @@ const Register = () => {
       return;
     }
 
-    const { confirmPassword, ...submitData } = formData;
+    const submitData = {
+      email: formData.email,
+      password: formData.password,
+      displayName: formData.displayName,
+    };
     dispatch(register(submitData));
   };
 

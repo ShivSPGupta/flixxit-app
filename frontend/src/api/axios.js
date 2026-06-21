@@ -4,6 +4,12 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
 });
 
+const isAuthEndpoint = (url = '') => {
+  return ['/auth/login', '/auth/register', '/auth/refresh'].some((path) =>
+    url.includes(path)
+  );
+};
+
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
@@ -31,9 +37,14 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    const requestUrl = originalRequest?.url || '';
 
-    // Handle 401 errors (Unauthorized)
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Only attempt refresh for protected API calls, not auth endpoints.
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !isAuthEndpoint(requestUrl)
+    ) {
       originalRequest._retry = true;
 
       try {
@@ -58,10 +69,9 @@ api.interceptors.response.use(
         }
 
         // Try to refresh the token
-        const response = await axios.post(
-          `${import.meta.env.VITE_API_URL}/auth/refresh`,
-          { refreshToken: user.refreshToken }
-        );
+        const response = await axios.post(`${import.meta.env.VITE_API_URL}/auth/refresh`, {
+          refreshToken: user.refreshToken,
+        });
 
         // Update user with new tokens
         const newUser = { 

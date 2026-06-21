@@ -1,4 +1,4 @@
-const { searchMovies, getMovieDetails, getMoviesByKeyword } = require('../utils/omdbApi');
+const { searchMovies, getMovieDetails, getMoviesByKeyword } = require('../utils/tmdbApi');
 const { searchTrailer } = require('../utils/youtubeApi');
 
 exports.searchMoviesHandler = async (req, res, next) => {
@@ -15,10 +15,11 @@ exports.getMovieDetail = async (req, res, next) => {
   try {
     const { id } = req.params;
     const movieData = await getMovieDetails(id);
-    
-    if (movieData.Response === 'False') {
-      res.status(404);
-      throw new Error('Movie not found');
+
+    if (!movieData) {
+      return res.status(503).json({
+        message: 'Movie service is temporarily unavailable. Please try again later.',
+      });
     }
 
     // Get YouTube trailer

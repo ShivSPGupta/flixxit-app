@@ -7,7 +7,7 @@ A full-stack Netflix clone built with the MERN stack, featuring real movie data,
 ## ✨ Features
 
 - 🔐 **User Authentication** - Secure JWT-based registration and login
-- 🎥 **Real Movie Data** - Powered by OMDb API with 1000+ movies
+- 🎥 **Real Movie Data** - Powered by TMDb API with fast movie metadata and posters
 - ▶️ **YouTube Trailers** - Auto-play trailers on hover
 - ⭐ **My List** - Save your favorite movies
 - 🔍 **Smart Search** - Real-time search with instant results
@@ -47,7 +47,7 @@ A full-stack Netflix clone built with the MERN stack, featuring real movie data,
 - **Rate limiting** for API protection
 
 ### External APIs
-- **OMDb API** - Movie database
+- **TMDb API** - Movie database
 - **YouTube Data API** - Trailer videos
 
 ## ⚙️ Installation
@@ -55,7 +55,7 @@ A full-stack Netflix clone built with the MERN stack, featuring real movie data,
 ### Prerequisites
 - Node.js 18+ installed
 - MongoDB Atlas account (free tier works)
-- OMDb API key ([get one here](http://www.omdbapi.com/apikey.aspx))
+- TMDb API key ([get one here](https://www.themoviedb.org/settings/api))
 - YouTube Data API key ([get from Google Cloud](https://console.cloud.google.com))
 
 ### Backend Setup
@@ -74,8 +74,9 @@ PORT=5000
 MONGODB_URI=your_mongodb_connection_string
 JWT_SECRET=your_super_secret_jwt_key
 JWT_REFRESH_SECRET=your_refresh_token_secret
-OMDB_API_KEY=your_omdb_api_key
+TMDB_API_KEY=your_tmdb_api_key
 YOUTUBE_API_KEY=your_youtube_api_key
+CORS_ORIGIN=http://localhost:5173,https://your-frontend-domain.com
 NODE_ENV=development
 EOF
 
@@ -121,7 +122,7 @@ Visit `http://localhost:5173` to see the app!
 - Debounced search (500ms delay)
 - Live results dropdown
 - Full search results page
-- Powered by OMDb API
+- Powered by TMDb API
 
 ### My List
 - Add/remove movies with one click
@@ -142,7 +143,7 @@ Visit `http://localhost:5173` to see the app!
 
 ## 🐛 Known Issues
 
-- OMDb free tier limited to 1,000 requests/day, and not all poster in free tier
+- TMDb covers poster images directly; keep a fallback image in case a title has no poster
 - YouTube API has 10,000 units/day quota
 - Some movies may not have trailers available
 
