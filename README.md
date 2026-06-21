@@ -1,177 +1,328 @@
-# 🎬 Flixxit
+# Flixxit
 
-A full-stack Netflix clone built with the MERN stack, featuring real movie data, YouTube trailers, and user authentication.
+Flixxit is a full-stack Netflix-style movie app built with React, Redux Toolkit, Express, MongoDB, TMDb, and the YouTube Data API. It includes authentication, movie browsing, cached TMDb data, trailer lookup, search, profile management, and a responsive streaming-style UI.
 
-![Netflix Clone](https://img.shields.io/badge/React-18.2.0-blue) ![Node.js](https://img.shields.io/badge/Node.js-18+-green) ![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-brightgreen) ![License](https://img.shields.io/badge/license-MIT-blue)
+## Features
 
-## ✨ Features
+- JWT authentication with access and refresh tokens
+- TMDb-powered movie rows, search, details, posters, ratings, genres, cast, and metadata
+- Backend TMDb caching with memory cache plus MongoDB `TmdbCache`
+- YouTube trailer lookup with memory cache plus MongoDB `TrailerCache`
+- Trending banner with TMDb trending-first and popular fallback behavior
+- Movie rows for trending, action, Marvel, Batman, comedy, horror, romance, sci-fi, documentary, and thriller
+- Search page with backend cache-first TMDb search
+- Quota-safe search bar suggestions from already-loaded Redux rows
+- My List favorites stored in MongoDB
+- Profile page with member-since account details
+- Responsive navbar, search suggestions, banner, rows, cards, and detail page
 
-- 🔐 **User Authentication** - Secure JWT-based registration and login
-- 🎥 **Real Movie Data** - Powered by TMDb API with fast movie metadata and posters
-- ▶️ **YouTube Trailers** - Auto-play trailers on hover
-- ⭐ **My List** - Save your favorite movies
-- 🔍 **Smart Search** - Real-time search with instant results
-- 📱 **Responsive Design** - Works perfectly on mobile, tablet, and desktop
-- 🎨 **Netflix UI** - Authentic Netflix-style interface with smooth animations
-- 👤 **User Profiles** - Manage account settings and preferences
-
-## 🚀 Live Demo
-
-**App Link**: [Live Demo](https://my-portfolio-six-azure-30.vercel.app/)
-
-## 📸 Screenshots
-
-### Home Page
-![Home Page](https://via.placeholder.com/800x400?text=Home+Page+Screenshot)
-
-### Movie Details
-![Movie Details](https://via.placeholder.com/800x400?text=Movie+Details+Screenshot)
-
-### My List
-![My List](https://via.placeholder.com/800x400?text=My+List+Screenshot)
-
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Frontend
-- **React 18** with Vite
-- **Redux Toolkit** for state management
-- **React Router** for navigation
-- **Tailwind CSS** for styling
-- **Axios** for API calls
+
+- React 19
+- Vite
+- Redux Toolkit
+- React Router
+- Tailwind CSS
+- Axios
 
 ### Backend
-- **Node.js** with Express
-- **MongoDB** with Mongoose
-- **JWT** for authentication
-- **bcrypt** for password hashing
-- **Rate limiting** for API protection
+
+- Node.js
+- Express 5
+- MongoDB with Mongoose
+- JWT authentication
+- bcrypt password hashing
+- Helmet
+- Express rate limiting
 
 ### External APIs
-- **TMDb API** - Movie database
-- **YouTube Data API** - Trailer videos
 
-## ⚙️ Installation
+- TMDb API for movie data
+- TMDb image CDN for posters
+- YouTube Data API for trailers
 
-### Prerequisites
-- Node.js 18+ installed
-- MongoDB Atlas account (free tier works)
-- TMDb API key ([get one here](https://www.themoviedb.org/settings/api))
-- YouTube Data API key ([get from Google Cloud](https://console.cloud.google.com))
+## Project Structure
 
-### Backend Setup
+```text
+backend/
+  config/
+  controllers/
+  middleware/
+  models/
+  routes/
+  utils/
+frontend/
+  public/
+  src/
+    api/
+    components/
+    pages/
+    redux/
+    utils/
+```
 
-```bash
-# Clone the repository
-git clone https://github.com/ShivSPGupta/flixxit-app.git
-cd flixxit-app/backend
+## Environment Variables
 
-# Install dependencies
-npm install
+### Backend
 
-# Create .env file
-cat > .env << EOF
+Create `backend/.env`:
+
+```env
 PORT=5000
 MONGODB_URI=your_mongodb_connection_string
-JWT_SECRET=your_super_secret_jwt_key
+JWT_SECRET=your_access_token_secret
 JWT_REFRESH_SECRET=your_refresh_token_secret
 TMDB_API_KEY=your_tmdb_api_key
 YOUTUBE_API_KEY=your_youtube_api_key
 CORS_ORIGIN=http://localhost:5173,https://your-frontend-domain.com
 NODE_ENV=development
-EOF
-
-# Start the server
-npm run dev
 ```
 
-### Frontend Setup
+Optional debugging:
+
+```env
+DEBUG_TMDB=true
+```
+
+### Frontend
+
+Create `frontend/.env`:
+
+```env
+VITE_API_URL=http://localhost:5000/api
+```
+
+For production, set `VITE_API_URL` to your deployed backend API URL.
+
+## Local Setup
+
+### Backend
 
 ```bash
-# Navigate to frontend directory
-cd ../frontend
-
-# Install dependencies
+cd backend
 npm install
-
-# Create .env file
-echo "VITE_API_URL=http://localhost:5000/api" > .env
-
-# Start the development server
 npm run dev
 ```
 
-Visit `http://localhost:5173` to see the app!
+The backend runs on:
 
+```text
+http://localhost:5000
+```
 
-## 🎯 Key Features Explained
+Health check:
 
-### Authentication Flow
-- User registers with email and password
-- Password is hashed using bcrypt
-- JWT tokens (access + refresh) are generated
-- Tokens are stored in localStorage
-- Auto-refresh on token expiration
+```text
+GET /health
+```
 
-### Movie Browsing
-- Multiple categorized rows (Action, Marvel, Horror, etc.)
-- Horizontal scrolling with smooth animations
-- Hover effects with trailer preview
-- Click for detailed movie information
+### Frontend
 
-### Search Functionality
-- Debounced search (500ms delay)
-- Live results dropdown
-- Full search results page
-- Powered by TMDb API
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-### My List
-- Add/remove movies with one click
-- Persistent storage in MongoDB
-- Dedicated page to view saved movies
-- Visual feedback for added items
+The frontend runs on:
 
-## 🔒 Security Features
+```text
+http://localhost:5173
+```
 
-- Password hashing with bcrypt
-- JWT token authentication
-- Refresh token rotation
-- Rate limiting on endpoints
-- CORS protection
-- Helmet.js security headers
-- Input validation
+## API Overview
 
+### Auth
 
-## 🐛 Known Issues
+```text
+POST /api/auth/register
+POST /api/auth/login
+POST /api/auth/refresh
+GET  /api/auth/me
+```
 
-- TMDb covers poster images directly; keep a fallback image in case a title has no poster
-- YouTube API has 10,000 units/day quota
-- Some movies may not have trailers available
+### Movies
 
+```text
+GET /api/movies/row/:keyword?page=1
+GET /api/movies/search?query=mortal%20kombat
+GET /api/movies/search/:query
+GET /api/movies/detail/:id
+GET /api/movies/trailer/:title
+```
 
-## 🤝 Contributing
+### Favorites
 
-Contributions are welcome! Please follow these steps:
+```text
+GET    /api/user/favorites
+POST   /api/user/favorites
+DELETE /api/user/favorites/:id
+```
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+## Caching Behavior
 
-## 📄 License
+### TMDb Cache
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+TMDb data is cached in two layers:
 
-## 👨‍💻 Author
+```text
+memory cache -> MongoDB TmdbCache -> TMDb API
+```
 
-**Your Name**
+Cache TTLs:
+
+```text
+search: 12 hours
+movie detail: 7 days
+trending row: 30 minutes
+category rows: 6 hours
+```
+
+Empty search and row responses are ignored as usable cache, so a temporary empty response should not block fresh data later.
+
+### Trailer Cache
+
+YouTube trailer keys are cached in two layers:
+
+```text
+memory cache -> MongoDB TrailerCache -> YouTube API
+```
+
+Trailer cache behavior:
+
+```text
+successful trailer key in memory: 7 days
+successful trailer key in MongoDB: 30 days
+negative no-trailer result in memory: 10 minutes
+network/quota/server failures: not cached as no-trailer
+```
+
+Trailer cache is shared for all users and keyed by normalized movie title.
+
+## Movie Data Flow
+
+Homepage category rows are defined in `frontend/src/pages/Home.jsx`.
+
+Each `Row` component dispatches:
+
+```js
+getMovieRow({ keyword })
+```
+
+The backend handles:
+
+```text
+GET /api/movies/row/:keyword
+```
+
+`trending` uses:
+
+```text
+TMDb /trending/movie/week first
+TMDb /movie/popular fallback
+```
+
+Other genre rows use TMDb discover/search logic in `backend/utils/tmdbApi.js`.
+
+## Search Behavior
+
+The search bar is designed to reduce TMDb quota usage.
+
+While typing:
+
+```text
+searches already-loaded Redux rows only
+no backend request
+no TMDb request
+```
+
+On Enter:
+
+```text
+opens /search?q=...
+calls backend search once
+backend checks cache first
+TMDb is called only on cache miss
+```
+
+Multi-word searches are handled through the query-string endpoint:
+
+```text
+GET /api/movies/search?query=mortal%20kombat
+```
+
+Backend search can also retry fallback terms for multi-word queries when TMDb has a transient network issue.
+
+## Deployment Notes
+
+### Frontend on Vercel
+
+`frontend/vercel.json` rewrites all routes to `index.html` for React Router:
+
+```json
+{
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
+```
+
+Set:
+
+```env
+VITE_API_URL=https://your-backend-domain.com/api
+```
+
+### Backend on Render or Similar
+
+Set all backend environment variables in the hosting dashboard. Make sure `CORS_ORIGIN` includes the deployed frontend domain.
+
+Example:
+
+```env
+CORS_ORIGIN=http://localhost:5173,https://your-vercel-app.vercel.app
+```
+
+## Useful Commands
+
+Frontend build:
+
+```bash
+cd frontend
+npm run build
+```
+
+Backend start:
+
+```bash
+cd backend
+npm start
+```
+
+Backend dev:
+
+```bash
+cd backend
+npm run dev
+```
+
+## Known Notes
+
+- TMDb API requests are cached, but TMDb poster images load from the TMDb image CDN.
+- Poster image loading does not consume normal TMDb API query quota.
+- Some networks may block specific TMDb or YouTube endpoints.
+- YouTube Data API quota can be limited, so trailer keys are cached aggressively.
+- If stale movie rows show old poster URLs, clear the `tmdbcaches` collection or wait for TTL expiry.
+
+## Author
+
+Shiv Shankar Gupta
+
 - GitHub: [@ShivSPGupta](https://github.com/ShivSPGupta)
 - LinkedIn: [Shiv Shankar Gupta](https://linkedin.com/in/shiv-shankar-gupta)
 - Portfolio: [Portfolio](https://my-portfolio-six-azure-30.vercel.app/)
-
-
-## ⭐ Show Your Support
-
-If you found this project helpful, please give it a ⭐ on GitHub!
-
----
