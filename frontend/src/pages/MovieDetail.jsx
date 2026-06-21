@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getMovieDetail, clearMovieDetail } from '../redux/slices/moviesSlice';
 import { addToFavorites, removeFromFavorites } from '../redux/slices/favoritesSlice';
 import Navbar from '../components/Navbar';
+import { resolvePosterUrl, posterFallback } from '../utils/posterUrl';
 
 const MovieDetail = () => {
   const { id } = useParams();
@@ -12,6 +13,7 @@ const MovieDetail = () => {
   const { movieDetail, detail } = useSelector((state) => state.movies);
   const { list } = useSelector((state) => state.favorites);
   const [playTrailer, setPlayTrailer] = useState(false);
+  const posterUrl = resolvePosterUrl(movieDetail?.Poster, posterFallback);
 
   useEffect(() => {
     dispatch(getMovieDetail(id));
@@ -88,7 +90,7 @@ const MovieDetail = () => {
           ) : (
             <>
               <img
-                src={movieDetail.Poster !== 'N/A' ? movieDetail.Poster : 'https://via.placeholder.com/1920x1080?text=No+Image'}
+                src={posterUrl}
                 alt={movieDetail.Title}
                 className="w-full h-full object-cover"
               />

@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { searchMovies, clearSearchResults } from '../redux/slices/moviesSlice';
+import { clearSearchResults } from '../redux/slices/moviesSlice';
+import { resolvePosterUrl, posterFallback } from '../utils/posterUrl';
 
 const SearchBar = () => {
   const [query, setQuery] = useState('');
@@ -9,7 +10,26 @@ const SearchBar = () => {
   const searchRef = useRef(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { searchResults } = useSelector((state) => state.movies);
+  const { rows } = useSelector((state) => state.movies);
+
+  const localSuggestions = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+    if (normalizedQuery.length < 2) return [];
+
+    const seen = new Set();
+    return Object.values(rows)
+      .flatMap((row) => (Array.isArray(row) ? row : []))
+      .filter((movie) => {
+        const title = String(movie?.Title || '').toLowerCase();
+        if (!movie?.imdbID || seen.has(movie.imdbID) || !title.includes(normalizedQuery)) {
+          return false;
+        }
+
+        seen.add(movie.imdbID);
+        return true;
+      })
+      .slice(0, 6);
+  }, [query, rows]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -22,40 +42,34 @@ const SearchBar = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  useEffect(() => {
-    if (query.length > 2) {
-      const timeoutId = setTimeout(() => {
-        dispatch(searchMovies(query));
-      }, 500);
-
-      return () => clearTimeout(timeoutId);
-    } else {
-      dispatch(clearSearchResults());
-    }
-  }, [query, dispatch]);
-
-  const handleMovieClick = (imdbID) => {
-    navigate(`/movie/${imdbID}`);
-    setQuery('');
-    setIsOpen(false);
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (query.trim()) {
-      navigate(`/search?q=${encodeURIComponent(query)}`);
+    const trimmedQuery = query.trim();
+
+    if (trimmedQuery) {
+      navigate(`/search?q=${encodeURIComponent(trimmedQuery)}`);
+      dispatch(clearSearchResults());
+      setQuery('');
       setIsOpen(false);
     }
   };
 
-  const showResults = isOpen && query.length > 2 && searchResults.length > 0;
+  const handleSuggestionClick = (movieId) => {
+    navigate(`/movie/${movieId}`);
+    dispatch(clearSearchResults());
+    setQuery('');
+    setIsOpen(false);
+  };
+
+  const showSuggestions = isOpen && localSuggestions.length > 0;
 
   return (
     <div ref={searchRef} className="relative">
       <div className="flex items-center">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="p-2 hover:bg-gray-800 rounded transition"
+          className="rounded p-2 transition hover:bg-gray-800"
+          aria-label="Search"
         >
           <svg
             className="w-5 h-5"
@@ -73,40 +87,48 @@ const SearchBar = () => {
         </button>
 
         {isOpen && (
-          <form onSubmit={handleSubmit} className="ml-2">
+          <form
+            onSubmit={handleSubmit}
+            className="fixed left-4 right-4 top-16 z-50 sm:static sm:ml-2"
+          >
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Titles, people, genres"
-              className="bg-black/70 border border-white px-4 py-1 rounded text-sm focus:outline-none focus:border-white w-64"
+              className="w-full rounded border border-white bg-black/90 px-4 py-2 text-sm focus:border-white focus:outline-none sm:w-64 sm:bg-black/70 sm:py-1"
               autoFocus
             />
           </form>
         )}
       </div>
 
-      {showResults && searchResults.length > 0 && (
-        <div className="absolute top-full right-0 mt-2 w-80 max-h-96 overflow-y-auto bg-black/95 border border-gray-700 rounded shadow-xl">
-          {searchResults.slice(0, 5).map((movie) => (
+      {showSuggestions && (
+        <div className="fixed left-4 right-4 top-28 z-50 max-h-[60vh] overflow-y-auto rounded border border-gray-700 bg-black/95 shadow-xl sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:max-h-96 sm:w-80">
+          {localSuggestions.map((movie) => (
             <button
               key={movie.imdbID}
-              onClick={() => handleMovieClick(movie.imdbID)}
-              className="flex items-center space-x-3 p-3 hover:bg-gray-800 transition w-full text-left"
+              type="button"
+              onClick={() => handleSuggestionClick(movie.imdbID)}
+              className="flex w-full items-center gap-3 p-3 text-left transition hover:bg-gray-800"
             >
               <img
-                src={movie.Poster !== 'N/A' ? movie.Poster : 'https://via.placeholder.com/50x75?text=No+Image'}
+                src={resolvePosterUrl(movie.Poster, posterFallback)}
                 alt={movie.Title}
-                className="w-12 h-16 object-cover rounded"
+                onError={(event) => {
+                  event.currentTarget.src = posterFallback;
+                }}
+                className="h-16 w-12 rounded object-cover"
               />
-              <div>
-                <p className="font-semibold">{movie.Title}</p>
+              <div className="min-w-0">
+                <p className="truncate font-semibold">{movie.Title}</p>
                 <p className="text-sm text-gray-400">{movie.Year}</p>
               </div>
             </button>
           ))}
         </div>
       )}
+
     </div>
   );
 };

@@ -6,12 +6,15 @@ const {
   searchMoviesHandler,
   getMovieDetail,
   getMoviesByRow,
-  getTrailer
+  getTrailer,
+  getPoster
 } = require('../controllers/moviesController');
 
+router.get('/search', protect, apiLimiter, searchMoviesHandler);
 router.get('/search/:query', protect, apiLimiter, searchMoviesHandler);
 router.get('/detail/:id', protect, getMovieDetail);
 router.get('/row/:keyword', protect, apiLimiter, getMoviesByRow);
 router.get('/trailer/:title', protect, getTrailer);
+router.get('/poster', getPoster);
 
 module.exports = router;

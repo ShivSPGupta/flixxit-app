@@ -31,12 +31,12 @@ const Navbar = () => {
         scrolled ? "bg-black" : "bg-gradient-to-b from-black to-transparent"
       }`}
     >
-      <div className="flex items-center justify-between px-4 md:px-12 py-4">
-        <div className="flex items-center space-x-8">
-          <Link to="/home" className="text-netflix text-3xl font-bold">
+      <div className="flex items-center justify-between gap-3 px-3 py-3 sm:px-4 md:px-12 md:py-4">
+        <div className="flex min-w-0 items-center gap-4 md:gap-8">
+          <Link to="/home" className="text-netflix shrink-0 text-2xl font-bold sm:text-3xl">
             FLIXXIT
           </Link>
-          <div className="hidden md:flex space-x-6">
+          <div className="hidden space-x-6 md:flex">
             <Link to="/home" className="hover:text-gray-300 transition">
               Home
             </Link>
@@ -47,13 +47,13 @@ const Navbar = () => {
 
           {/* Mobile Navigation - ONLY My List */}
           <div className="flex md:hidden">
-            <Link to="/mylist" className="hover:text-gray-300 transition">
+            <Link to="/mylist" className="whitespace-nowrap text-sm transition hover:text-gray-300 sm:text-base">
               My List
             </Link>
           </div>
         </div>
 
-        <div className="flex items-center space-x-4">
+        <div className="flex shrink-0 items-center gap-2 sm:gap-4">
           <SearchBar />
 
           <div className="relative">
@@ -64,7 +64,7 @@ const Navbar = () => {
               <img
                 src={user?.avatar}
                 alt="Avatar"
-                className="w-8 h-8 rounded"
+                className="h-8 w-8 rounded"
               />
               <svg
                 className={`w-4 h-4 transition-transform ${

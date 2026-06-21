@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToFavorites, removeFromFavorites } from '../redux/slices/favoritesSlice';
+import { resolvePosterUrl, posterFallback } from '../utils/posterUrl';
 import TrailerHover from './TrailerHover';
 
 const MovieCard = ({ movie, isLarge = false }) => {
@@ -10,7 +11,7 @@ const MovieCard = ({ movie, isLarge = false }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { list } = useSelector((state) => state.favorites);
-  const fallbackPoster = 'https://via.placeholder.com/200x300?text=No+Image';
+  const posterSrc = resolvePosterUrl(movie.Poster, posterFallback);
 
   useEffect(() => {
     return () => {
@@ -68,19 +69,19 @@ const MovieCard = ({ movie, isLarge = false }) => {
       }}
     >
       <img
-        src={movie.Poster !== 'N/A' ? movie.Poster : fallbackPoster}
+        src={posterSrc}
         alt={movie.Title}
         onClick={handleClick}
         onError={(e) => {
-          e.currentTarget.src = fallbackPoster;
+          e.currentTarget.src = posterFallback;
         }}
         className="w-full h-full object-cover rounded"
       />
-      
+
       {showTrailer && (
         <TrailerHover movie={movie} />
       )}
-      
+
       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-3 opacity-0 hover:opacity-100 transition-opacity">
         <h3 className="font-semibold text-sm mb-2 line-clamp-2">{movie.Title}</h3>
         <div className="flex items-center justify-between">

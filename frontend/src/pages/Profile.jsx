@@ -29,6 +29,9 @@ const Profile = () => {
     confirmPassword: '',
   });
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const memberSince = user?.createdAt
+    ? new Date(user.createdAt).toLocaleDateString()
+    : 'Not available';
 
   useEffect(() => {
     if (isSuccess && message) {
@@ -148,7 +151,7 @@ const Profile = () => {
               />
               <div>
                 <h3 className="text-xl font-semibold">{user?.email}</h3>
-                <p className="text-gray-400">Member since {new Date(user?.createdAt).toLocaleDateString()}</p>
+                <p className="text-gray-400">Member since {memberSince}</p>
               </div>
             </div>
             

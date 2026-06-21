@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { getFavorites, removeFromFavorites } from '../redux/slices/favoritesSlice';
 import Navbar from '../components/Navbar';
+import { resolvePosterUrl, posterFallback } from '../utils/posterUrl';
 
 const MyList = () => {
   const navigate = useNavigate();
@@ -49,7 +50,7 @@ const MyList = () => {
                   className="cursor-pointer transition-transform hover:scale-105"
                 >
                   <img
-                    src={movie.poster !== 'N/A' ? movie.poster : 'https://via.placeholder.com/200x300?text=No+Image'}
+                    src={resolvePosterUrl(movie.poster, posterFallback)}
                     alt={movie.title}
                     className="w-full h-auto rounded"
                   />

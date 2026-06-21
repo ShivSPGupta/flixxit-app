@@ -77,7 +77,8 @@ api.interceptors.response.use(
         const newUser = { 
           ...user, 
           token: response.data.token,
-          refreshToken: response.data.refreshToken 
+          refreshToken: response.data.refreshToken,
+          ...(response.data.user || {}),
         };
         localStorage.setItem('user', JSON.stringify(newUser));
 

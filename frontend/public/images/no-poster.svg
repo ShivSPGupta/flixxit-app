@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" role="img" aria-labelledby="title desc">
+  <title id="title">No image available</title>
+  <desc id="desc">Dark placeholder poster with a film icon</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#111827" />
+      <stop offset="100%" stop-color="#030712" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="600" fill="url(#bg)" rx="24" />
+  <rect x="32" y="32" width="336" height="536" rx="18" fill="none" stroke="#374151" stroke-width="2" stroke-dasharray="10 10" />
+  <g transform="translate(200 250)" fill="none" stroke="#9ca3af" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="-70" y="-42" width="140" height="84" rx="12" />
+    <circle cx="-35" cy="0" r="14" />
+    <circle cx="0" cy="0" r="14" />
+    <circle cx="35" cy="0" r="14" />
+    <path d="M-48 -42v-24M-16 -42v-24M16 -42v-24M48 -42v-24" />
+    <path d="M-48 42v24M-16 42v24M16 42v24M48 42v24" />
+  </g>
+  <text x="200" y="380" text-anchor="middle" fill="#d1d5db" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700">No Image</text>
+  <text x="200" y="420" text-anchor="middle" fill="#6b7280" font-family="Arial, Helvetica, sans-serif" font-size="18">Poster unavailable</text>
+</svg>

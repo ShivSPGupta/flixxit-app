@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../api/axios';
 
 const TrailerHover = ({ movie }) => {
@@ -52,6 +53,12 @@ const TrailerHover = ({ movie }) => {
           <p className="text-sm text-gray-400 mt-1">
             We could not find a playable trailer for this title.
           </p>
+          <Link
+            to={`/movie/${movie.imdbID}`}
+            className="mt-4 inline-flex items-center justify-center rounded bg-white px-4 py-2 text-sm font-semibold text-black transition hover:bg-gray-200"
+          >
+            Open details
+          </Link>
         </div>
       </div>
     );

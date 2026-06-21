@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { searchMovies } from '../redux/slices/moviesSlice';
 import Navbar from '../components/Navbar';
+import { resolvePosterUrl, posterFallback } from '../utils/posterUrl';
 
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
@@ -51,7 +52,7 @@ const SearchResults = () => {
                 className="cursor-pointer transition-transform hover:scale-105"
               >
                 <img
-                  src={movie.Poster !== 'N/A' ? movie.Poster : 'https://via.placeholder.com/200x300?text=No+Image'}
+                  src={resolvePosterUrl(movie.Poster, posterFallback)}
                   alt={movie.Title}
                   className="w-full h-auto rounded"
                 />

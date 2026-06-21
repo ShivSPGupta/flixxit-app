@@ -3,34 +3,37 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { getMovieRow } from '../redux/slices/moviesSlice';
 import { addToFavorites } from '../redux/slices/favoritesSlice';
+import { resolvePosterUrl, posterFallback } from '../utils/posterUrl';
 
 const Banner = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { rows } = useSelector((state) => state.movies);
   const { list } = useSelector((state) => state.favorites);
-  const fallbackPoster = 'https://via.placeholder.com/1920x1080?text=No+Image';
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
     dispatch(getMovieRow({ keyword: 'trending' }));
   }, [dispatch]);
 
+  const bannerMovies = rows.trending || [];
+
   useEffect(() => {
-    if (!rows.trending?.length) return;
+    if (!bannerMovies.length) return;
 
     const intervalId = setInterval(() => {
-      setCurrentIndex((index) => (index + 1) % rows.trending.length);
+      setCurrentIndex((index) => (index + 1) % bannerMovies.length);
     }, 5000);
 
     return () => clearInterval(intervalId);
-  }, [rows.trending]);
+  }, [bannerMovies]);
 
-  const safeIndex = rows.trending?.length
-    ? currentIndex % rows.trending.length
+  const safeIndex = bannerMovies.length
+    ? currentIndex % bannerMovies.length
     : 0;
 
-  const movie = rows.trending?.[safeIndex] || rows.trending?.[0] || null;
+  const movie = bannerMovies[safeIndex] || bannerMovies[0] || null;
+  const posterUrl = resolvePosterUrl(movie?.Poster, posterFallback);
 
   const truncate = (str, n) => {
     return str?.length > n ? str.substr(0, n - 1) + '...' : str;
@@ -55,7 +58,7 @@ const Banner = () => {
       key={movie.imdbID}
       className="relative min-h-[70vh] overflow-hidden bg-cover bg-center transition-all duration-700 ease-in-out md:h-[70vh]"
       style={{
-        backgroundImage: `url(${movie.Poster !== 'N/A' ? movie.Poster : fallbackPoster})`,
+        backgroundImage: `url(${posterUrl})`,
       }}
     >
       <div className="absolute inset-0 bg-black/20" />
@@ -97,9 +100,9 @@ const Banner = () => {
           </p>
         </div>
 
-        {rows.trending?.length > 1 && (
+        {bannerMovies.length > 1 && (
           <div className="absolute bottom-16 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2">
-            {rows.trending.map((item, index) => (
+            {bannerMovies.map((item, index) => (
               <button
                 key={item.imdbID}
                 type="button"

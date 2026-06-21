@@ -6,10 +6,12 @@ const initialState = {
   movieDetail: null,
   rows: {},
   rowStatus: {},
+  rowErrors: {},
   search: {
     isLoading: false,
     isError: false,
     message: '',
+    query: '',
   },
   detail: {
     isLoading: false,
@@ -22,12 +24,28 @@ export const searchMovies = createAsyncThunk(
   'movies/search',
   async (query, thunkAPI) => {
     try {
-      const response = await api.get(`/movies/search/${query}`);
+      const response = await api.get('/movies/search', {
+        params: { query: String(query || '').trim() },
+      });
       return response.data;
     } catch (error) {
       const message = error.response?.data?.message || error.message;
       return thunkAPI.rejectWithValue(message);
     }
+  },
+  {
+    condition: (query, { getState }) => {
+      const trimmedQuery = String(query || '').trim();
+      if (!trimmedQuery) return false;
+
+      const { movies } = getState();
+      const isSameQueryLoaded =
+        movies.search.query?.toLowerCase() === trimmedQuery.toLowerCase() &&
+        Array.isArray(movies.searchResults) &&
+        movies.searchResults.length > 0;
+
+      return !movies.search.isLoading && !isSameQueryLoaded;
+    },
   }
 );
 
@@ -106,6 +124,7 @@ const moviesSlice = createSlice({
       state.searchResults = [];
       state.search.isError = false;
       state.search.message = '';
+      state.search.query = '';
     },
     clearMovieDetail: (state) => {
       state.movieDetail = null;
@@ -116,10 +135,11 @@ const moviesSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(searchMovies.pending, (state) => {
+      .addCase(searchMovies.pending, (state, action) => {
         state.search.isLoading = true;
         state.search.isError = false;
         state.search.message = '';
+        state.search.query = String(action.meta.arg || '').trim();
       })
       .addCase(searchMovies.fulfilled, (state, action) => {
         state.search.isLoading = false;
@@ -153,16 +173,12 @@ const moviesSlice = createSlice({
         const keyword = action.meta?.arg?.keyword;
         if (keyword) {
           state.rowStatus[keyword] = 'loading';
+          state.rowErrors[keyword] = '';
         }
-        state.search.isLoading = true;
-        state.search.isError = false;
-        state.search.message = '';
       })
       .addCase(getMovieRow.fulfilled, (state, action) => {
         state.rowStatus[action.payload.keyword] = 'idle';
-        state.search.isLoading = false;
-        state.search.isError = false;
-        state.search.message = '';
+        state.rowErrors[action.payload.keyword] = action.payload.data.Error || '';
         // Remove duplicates before storing
         const movies = action.payload.data.Search || [];
         state.rows[action.payload.keyword] = removeDuplicates(movies);
@@ -171,10 +187,8 @@ const moviesSlice = createSlice({
         const keyword = action.meta?.arg?.keyword;
         if (keyword) {
           state.rowStatus[keyword] = 'idle';
+          state.rowErrors[keyword] = action.payload || 'Failed to load row';
         }
-        state.search.isLoading = false;
-        state.search.isError = true;
-        state.search.message = action.payload;
       });
   },
 });

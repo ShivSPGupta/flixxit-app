@@ -10,6 +10,14 @@ const generateRefreshToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_REFRESH_SECRET, { expiresIn: "30d" });
 };
 
+const buildUserResponse = (user) => ({
+  _id: user._id,
+  email: user.email,
+  displayName: user.displayName,
+  avatar: user.avatar,
+  createdAt: user.createdAt,
+});
+
 exports.register = async (req, res) => {
   try {
     const { email, password, displayName } = req.body;
@@ -45,10 +53,7 @@ exports.register = async (req, res) => {
     const refreshToken = generateRefreshToken(user._id);
 
     res.status(201).json({
-      _id: user._id,
-      email: user.email,
-      displayName: user.displayName,
-      avatar: user.avatar,
+      ...buildUserResponse(user),
       token,
       refreshToken,
     });
@@ -88,10 +93,7 @@ exports.login = async (req, res) => {
     const refreshToken = generateRefreshToken(user._id);
 
     res.json({
-      _id: user._id,
-      email: user.email,
-      displayName: user.displayName,
-      avatar: user.avatar,
+      ...buildUserResponse(user),
       token,
       refreshToken,
     });
@@ -125,6 +127,7 @@ exports.refreshToken = async (req, res) => {
     res.json({
       token: newToken,
       refreshToken: newRefreshToken,
+      user: buildUserResponse(user),
     });
   } catch (error) {
     res.status(401).json({ message: "Invalid refresh token" });
@@ -152,10 +155,7 @@ exports.updateEmail = async (req, res) => {
     await req.user.save();
 
     res.json({
-      _id: req.user._id,
-      email: req.user.email,
-      displayName: req.user.displayName,
-      avatar: req.user.avatar,
+      ...buildUserResponse(req.user),
     });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
@@ -209,10 +209,7 @@ exports.updateProfile = async (req, res) => {
     await req.user.save();
 
     res.json({
-      _id: req.user._id,
-      email: req.user.email,
-      displayName: req.user.displayName,
-      avatar: req.user.avatar,
+      ...buildUserResponse(req.user),
     });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
