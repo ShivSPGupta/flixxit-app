@@ -1,7 +1,16 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../../api/axios';
 
-const user = JSON.parse(localStorage.getItem('user'));
+const getStoredUser = () => {
+  try {
+    return JSON.parse(localStorage.getItem('user'));
+  } catch {
+    localStorage.removeItem('user');
+    return null;
+  }
+};
+
+const user = getStoredUser();
 
 const initialState = {
   user: user || null,
@@ -15,7 +24,11 @@ export const register = createAsyncThunk(
   'auth/register',
   async (userData, thunkAPI) => {
     try {
-      const response = await api.post('/auth/register', userData);
+      const response = await api.post('/auth/register', {
+        ...userData,
+        email: String(userData.email || '').trim().toLowerCase(),
+        displayName: String(userData.displayName || '').trim(),
+      });
       localStorage.setItem('user', JSON.stringify(response.data));
       return response.data;
     } catch (error) {
@@ -29,7 +42,10 @@ export const login = createAsyncThunk(
   'auth/login',
   async (userData, thunkAPI) => {
     try {
-      const response = await api.post('/auth/login', userData);
+      const response = await api.post('/auth/login', {
+        ...userData,
+        email: String(userData.email || '').trim().toLowerCase(),
+      });
       localStorage.setItem('user', JSON.stringify(response.data));
       return response.data;
     } catch (error) {

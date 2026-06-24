@@ -1,16 +1,45 @@
-# React + Vite
+# Flixxit Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React frontend for the Flixxit movie streaming-style app.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- React 19
+- Vite
+- Redux Toolkit
+- React Router
+- Tailwind CSS
+- Axios
 
-## React Compiler
+## Environment
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Create `frontend/.env`:
 
-## Expanding the ESLint configuration
+```env
+VITE_API_URL=http://localhost:5000/api
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+For production, set `VITE_API_URL` to the deployed backend API URL.
+
+## Scripts
+
+```bash
+npm install
+npm run dev
+npm run lint
+npm run build
+```
+
+## Auth Notes
+
+- Login and signup normalize email before calling the API.
+- Form errors are shown inline.
+- Protected pages require a stored auth token.
+- The Axios interceptor refreshes expired access tokens through the backend refresh endpoint.
+
+## Movie UI Notes
+
+- Homepage rows are loaded through Redux.
+- Search suggestions use already-loaded rows while typing to reduce API usage.
+- Full search runs when the user presses Enter.
+- Poster URLs are resolved through `src/utils/posterUrl.js`.

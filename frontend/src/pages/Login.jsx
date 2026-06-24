@@ -8,6 +8,7 @@ const Login = () => {
     email: '',
     password: '',
   });
+  const [localError, setLocalError] = useState('');
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -16,24 +17,27 @@ const Login = () => {
   );
 
   useEffect(() => {
-    // If user is already logged in, redirect to home
+    dispatch(reset());
+
+    return () => {
+      dispatch(reset());
+    };
+  }, [dispatch]);
+
+  useEffect(() => {
     if (user) {
-      navigate('/home');
-      return;
-    }
-
-    if (isError) {
-      alert(message || 'Login failed. Please try again.');
-      dispatch(reset());
-    }
-
-    if (isSuccess && user) {
       dispatch(reset());
       navigate('/home');
     }
-  }, [user, isError, isSuccess, message, navigate, dispatch]);
+  }, [user, navigate, dispatch]);
+
+  const formError = localError || (isError ? message || 'Login failed. Please try again.' : '');
 
   const handleChange = (e) => {
+    setLocalError('');
+    if (isError || isSuccess) {
+      dispatch(reset());
+    }
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -42,13 +46,15 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const email = formData.email.trim().toLowerCase();
+    const password = formData.password;
     
-    if (!formData.email || !formData.password) {
-      alert('Please fill in all fields');
+    if (!email || !password) {
+      setLocalError('Please fill in all fields');
       return;
     }
 
-    dispatch(login(formData));
+    dispatch(login({ email, password }));
   };
 
   return (
@@ -56,12 +62,12 @@ const Login = () => {
       backgroundImage: 'url(https://assets.nflxext.com/ffe/siteui/vlv3/9d3533b2-0e2b-40b2-95e0-ecd7979cc88b/a3873901-5b7c-46eb-b9fa-12fea5197bd3/IN-en-20240311-popsignuptwoweeks-perspective_alpha_website_large.jpg)'
     }}>
       <div className="min-h-screen bg-black/70 flex items-center justify-center">
-        <div className="bg-black/75 p-12 rounded w-full max-w-md">
+        <div className="bg-black/75 p-8 rounded w-full max-w-md sm:p-12">
           <h1 className="text-3xl font-bold mb-8">Sign In</h1>
           
-          {isError && message && (
-            <div className="bg-red-600/20 border border-red-600 text-red-500 px-4 py-3 rounded mb-4">
-              {message}
+          {formError && (
+            <div className="bg-red-600/20 border border-red-600 text-red-200 px-4 py-3 rounded mb-4">
+              {formError}
             </div>
           )}
           
@@ -73,6 +79,7 @@ const Login = () => {
                 placeholder="Email"
                 value={formData.email}
                 onChange={handleChange}
+                autoComplete="email"
                 className="w-full bg-gray-700 border border-gray-600 rounded px-4 py-3 focus:outline-none focus:border-white"
                 required
               />
@@ -85,6 +92,7 @@ const Login = () => {
                 placeholder="Password"
                 value={formData.password}
                 onChange={handleChange}
+                autoComplete="current-password"
                 className="w-full bg-gray-700 border border-gray-600 rounded px-4 py-3 focus:outline-none focus:border-white"
                 required
               />

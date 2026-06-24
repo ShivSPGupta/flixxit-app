@@ -5,6 +5,7 @@ Flixxit is a full-stack Netflix-style movie app built with React, Redux Toolkit,
 ## Features
 
 - JWT authentication with access and refresh tokens
+- Login and signup forms with inline validation, normalized emails, and protected routes
 - TMDb-powered movie rows, search, details, posters, ratings, genres, cast, and metadata
 - Backend TMDb caching with memory cache plus MongoDB `TmdbCache`
 - YouTube trailer lookup with memory cache plus MongoDB `TrailerCache`
@@ -140,7 +141,12 @@ http://localhost:5173
 POST /api/auth/register
 POST /api/auth/login
 POST /api/auth/refresh
+POST /api/auth/logout
 GET  /api/auth/me
+PUT  /api/auth/update-email
+PUT  /api/auth/update-password
+PUT  /api/auth/update-profile
+DELETE /api/auth/delete-account
 ```
 
 ### Movies
@@ -255,6 +261,38 @@ GET /api/movies/search?query=mortal%20kombat
 
 Backend search can also retry fallback terms for multi-word queries when TMDb has a transient network issue.
 
+## Auth Behavior
+
+Authentication is handled with Redux Toolkit on the frontend and JWT on the backend.
+
+Frontend behavior:
+
+```text
+login/register normalize email before sending
+stored user data is safely parsed from localStorage
+broken localStorage auth data is cleared automatically
+protected routes require a valid stored token
+login/register errors are shown inline instead of browser alerts
+```
+
+Backend behavior:
+
+```text
+register/login/update-email trim and lowercase email
+email format is validated before database queries
+passwords are hashed with bcrypt
+access token is returned to the frontend
+refresh token is stored in an httpOnly cookie
+```
+
+The refresh endpoint is available at:
+
+```text
+POST /api/auth/refresh
+```
+
+The frontend Axios interceptor calls the refresh endpoint automatically when an authenticated request receives an expired-token response.
+
 ## Deployment Notes
 
 ### Frontend on Vercel
@@ -289,6 +327,13 @@ CORS_ORIGIN=http://localhost:5173,https://your-vercel-app.vercel.app
 ```
 
 ## Useful Commands
+
+Frontend lint:
+
+```bash
+cd frontend
+npm run lint
+```
 
 Frontend build:
 

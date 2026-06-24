@@ -19,24 +19,24 @@ const Register = () => {
   );
 
   useEffect(() => {
-    // If user is already logged in, redirect to home
+    dispatch(reset());
+
+    return () => {
+      dispatch(reset());
+    };
+  }, [dispatch]);
+
+  useEffect(() => {
     if (user) {
-      navigate('/home');
-      return;
-    }
-
-    if (isError) {
-      alert(message || 'Registration failed. Please try again.');
-      dispatch(reset());
-    }
-
-    if (isSuccess && user) {
       dispatch(reset());
       navigate('/home');
     }
-  }, [user, isError, isSuccess, message, navigate, dispatch]);
+  }, [user, navigate, dispatch]);
 
   const handleChange = (e) => {
+    if (isError || isSuccess) {
+      dispatch(reset());
+    }
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -52,11 +52,17 @@ const Register = () => {
 
   const validateForm = () => {
     const newErrors = {};
+    const email = formData.email.trim().toLowerCase();
+    const displayName = formData.displayName.trim();
 
-    if (!formData.email) {
+    if (!email) {
       newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
       newErrors.email = 'Email is invalid';
+    }
+
+    if (displayName.length > 40) {
+      newErrors.displayName = 'Display name must be 40 characters or less';
     }
 
     if (!formData.password) {
@@ -81,9 +87,9 @@ const Register = () => {
     }
 
     const submitData = {
-      email: formData.email,
+      email: formData.email.trim().toLowerCase(),
       password: formData.password,
-      displayName: formData.displayName,
+      displayName: formData.displayName.trim(),
     };
     dispatch(register(submitData));
   };
@@ -93,11 +99,11 @@ const Register = () => {
       backgroundImage: 'url(https://assets.nflxext.com/ffe/siteui/vlv3/9d3533b2-0e2b-40b2-95e0-ecd7979cc88b/a3873901-5b7c-46eb-b9fa-12fea5197bd3/IN-en-20240311-popsignuptwoweeks-perspective_alpha_website_large.jpg)'
     }}>
       <div className="min-h-screen bg-black/70 flex items-center justify-center py-12">
-        <div className="bg-black/75 p-12 rounded w-full max-w-md">
+        <div className="bg-black/75 p-8 rounded w-full max-w-md sm:p-12">
           <h1 className="text-3xl font-bold mb-8">Sign Up</h1>
           
           {isError && message && (
-            <div className="bg-red-600/20 border border-red-600 text-red-500 px-4 py-3 rounded mb-4">
+            <div className="bg-red-600/20 border border-red-600 text-red-200 px-4 py-3 rounded mb-4">
               {message}
             </div>
           )}
@@ -110,6 +116,7 @@ const Register = () => {
                 placeholder="Email"
                 value={formData.email}
                 onChange={handleChange}
+                autoComplete="email"
                 className={`w-full bg-gray-700 border ${
                   errors.email ? 'border-red-500' : 'border-gray-600'
                 } rounded px-4 py-3 focus:outline-none focus:border-white`}
@@ -127,8 +134,14 @@ const Register = () => {
                 placeholder="Display Name (optional)"
                 value={formData.displayName}
                 onChange={handleChange}
-                className="w-full bg-gray-700 border border-gray-600 rounded px-4 py-3 focus:outline-none focus:border-white"
+                autoComplete="name"
+                className={`w-full bg-gray-700 border ${
+                  errors.displayName ? 'border-red-500' : 'border-gray-600'
+                } rounded px-4 py-3 focus:outline-none focus:border-white`}
               />
+              {errors.displayName && (
+                <p className="text-red-500 text-sm mt-1">{errors.displayName}</p>
+              )}
             </div>
             
             <div>
@@ -138,6 +151,7 @@ const Register = () => {
                 placeholder="Password"
                 value={formData.password}
                 onChange={handleChange}
+                autoComplete="new-password"
                 className={`w-full bg-gray-700 border ${
                   errors.password ? 'border-red-500' : 'border-gray-600'
                 } rounded px-4 py-3 focus:outline-none focus:border-white`}
@@ -156,6 +170,7 @@ const Register = () => {
                 placeholder="Confirm Password"
                 value={formData.confirmPassword}
                 onChange={handleChange}
+                autoComplete="new-password"
                 className={`w-full bg-gray-700 border ${
                   errors.confirmPassword ? 'border-red-500' : 'border-gray-600'
                 } rounded px-4 py-3 focus:outline-none focus:border-white`}

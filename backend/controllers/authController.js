@@ -10,6 +10,9 @@ const generateRefreshToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_REFRESH_SECRET, { expiresIn: "30d" });
 };
 
+const normalizeEmail = (email) => String(email || "").trim().toLowerCase();
+const isValidEmail = (email) => /^\S+@\S+\.\S+$/.test(email);
+
 const buildUserResponse = (user) => ({
   _id: user._id,
   email: user.email,
@@ -21,11 +24,16 @@ const buildUserResponse = (user) => ({
 exports.register = async (req, res) => {
   try {
     const { email, password, displayName } = req.body;
+    const normalizedEmail = normalizeEmail(email);
 
-    if (!email || !password) {
+    if (!normalizedEmail || !password) {
       return res
         .status(400)
         .json({ message: "Please provide email and password" });
+    }
+
+    if (!isValidEmail(normalizedEmail)) {
+      return res.status(400).json({ message: "Please provide a valid email" });
     }
 
     if (password.length < 6) {
@@ -34,7 +42,7 @@ exports.register = async (req, res) => {
         .json({ message: "Password must be at least 6 characters" });
     }
 
-    const userExists = await User.findOne({ email: email.toLowerCase() });
+    const userExists = await User.findOne({ email: normalizedEmail });
     if (userExists) {
       return res.status(400).json({ message: "User already exists" });
     }
@@ -44,9 +52,9 @@ exports.register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const user = await User.create({
-      email: email.toLowerCase(),
+      email: normalizedEmail,
       password: hashedPassword,
-      displayName: displayName || "Flixxit User",
+      displayName: String(displayName || "").trim() || "Flixxit User",
     });
 
     const token = generateToken(user._id);
@@ -69,14 +77,19 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
+    const normalizedEmail = normalizeEmail(email);
 
-    if (!email || !password) {
+    if (!normalizedEmail || !password) {
       return res
         .status(400)
         .json({ message: "Please provide email and password" });
     }
 
-    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!isValidEmail(normalizedEmail)) {
+      return res.status(400).json({ message: "Please provide a valid email" });
+    }
+
+    const user = await User.findOne({ email: normalizedEmail });
 
     if (!user) {
       return res.status(401).json({ message: "Invalid email or password" });
@@ -137,13 +150,18 @@ exports.refreshToken = async (req, res) => {
 exports.updateEmail = async (req, res) => {
   try {
     const { email } = req.body;
+    const normalizedEmail = normalizeEmail(email);
 
-    if (!email) {
+    if (!normalizedEmail) {
       return res.status(400).json({ message: "Email is required" });
     }
 
+    if (!isValidEmail(normalizedEmail)) {
+      return res.status(400).json({ message: "Please provide a valid email" });
+    }
+
     const emailExists = await User.findOne({
-      email: email.toLowerCase(),
+      email: normalizedEmail,
       _id: { $ne: req.user._id },
     });
 
@@ -151,7 +169,7 @@ exports.updateEmail = async (req, res) => {
       return res.status(400).json({ message: "Email already in use" });
     }
 
-    req.user.email = email.toLowerCase();
+    req.user.email = normalizedEmail;
     await req.user.save();
 
     res.json({
