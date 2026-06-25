@@ -9,7 +9,10 @@ Flixxit is a full-stack Netflix-style movie app built with React, Redux Toolkit,
 - TMDb-powered movie rows, search, details, posters, ratings, genres, cast, and metadata
 - Backend TMDb caching with memory cache plus MongoDB `TmdbCache`
 - YouTube trailer lookup with memory cache plus MongoDB `TrailerCache`
+- Request validation middleware for auth, movie, and favorites APIs
+- Centralized backend 404 and error handling
 - Trending banner with TMDb trending-first and popular fallback behavior
+- Movie detail fallback UI using cached/navigation data when TMDb is temporarily unavailable
 - Movie rows for trending, action, Marvel, Batman, comedy, horror, romance, sci-fi, documentary, and thriller
 - Search page with backend cache-first TMDb search
 - Quota-safe search bar suggestions from already-loaded Redux rows
@@ -35,6 +38,8 @@ Flixxit is a full-stack Netflix-style movie app built with React, Redux Toolkit,
 - MongoDB with Mongoose
 - JWT authentication
 - bcrypt password hashing
+- Centralized error middleware
+- Route-level validation middleware
 - Helmet
 - Express rate limiting
 
@@ -162,10 +167,40 @@ GET /api/movies/trailer/:title
 ### Favorites
 
 ```text
-GET    /api/user/favorites
-POST   /api/user/favorites
-DELETE /api/user/favorites/:id
+GET    /api/user/list
+POST   /api/user/list
+DELETE /api/user/list/:imdbID
 ```
+
+## Backend Architecture
+
+Backend requests follow a route-first architecture:
+
+```text
+route -> auth middleware -> validation middleware -> controller -> service/util -> response
+```
+
+Validation is centralized in:
+
+```text
+backend/middleware/validate.js
+```
+
+It validates and normalizes:
+
+```text
+auth payloads
+movie route params and query params
+favorites payloads and params
+```
+
+Unexpected backend errors are handled by:
+
+```text
+backend/middleware/errorHandler.js
+```
+
+Unknown routes return a consistent `404` response, and production server errors hide stack traces.
 
 ## Caching Behavior
 
@@ -231,6 +266,34 @@ TMDb /movie/popular fallback
 ```
 
 Other genre rows use TMDb discover/search logic in `backend/utils/tmdbApi.js`.
+
+## Movie Detail Behavior
+
+Movie detail pages are loaded through:
+
+```text
+GET /api/movies/detail/:id
+```
+
+The backend detail flow is:
+
+```text
+memory detail cache
+MongoDB TmdbCache detail cache
+TMDb /movie/:id
+stale detail cache if TMDb is temporarily failing
+cached row/search summary fallback
+```
+
+After TMDb detail data is loaded, the backend looks up the trailer key through YouTube:
+
+```text
+memory trailer cache
+MongoDB TrailerCache
+YouTube Data API
+```
+
+The frontend also passes basic movie data during navigation from cards, banner, search results, and My List. If the detail API temporarily fails, `MovieDetail.jsx` can still show a limited cached detail page instead of a broken screen.
 
 ## Search Behavior
 
@@ -362,6 +425,7 @@ npm run dev
 - Poster image loading does not consume normal TMDb API query quota.
 - Some networks may block specific TMDb or YouTube endpoints.
 - YouTube Data API quota can be limited, so trailer keys are cached aggressively.
+- Chrome may still show a red `503` network entry if TMDb is unreachable, but the UI can fall back to cached/basic movie data when available.
 - If stale movie rows show old poster URLs, clear the `tmdbcaches` collection or wait for TTL expiry.
 
 ## Author

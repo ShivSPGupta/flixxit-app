@@ -3,7 +3,7 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const helmet = require('helmet');
 const connectDB = require('./config/db');
-const { errorHandler } = require('./middleware/errorHandler');
+const { errorHandler, notFound } = require('./middleware/errorHandler');
 
 dotenv.config();
 
@@ -48,6 +48,8 @@ app.use('/api/user', require('./routes/favorites'));
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', message: 'Server is running' });
 });
+
+app.use(notFound);
 
 // Error handler (must be last)
 app.use(errorHandler);

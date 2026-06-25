@@ -55,7 +55,7 @@ const MovieCard = ({ movie, isLarge = false }) => {
   };
 
   const handleClick = () => {
-    navigate(`/movie/${movie.imdbID}`);
+    navigate(`/movie/${movie.imdbID}`, { state: { movie } });
   };
 
   return (

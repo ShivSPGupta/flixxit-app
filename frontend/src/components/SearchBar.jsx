@@ -54,8 +54,8 @@ const SearchBar = () => {
     }
   };
 
-  const handleSuggestionClick = (movieId) => {
-    navigate(`/movie/${movieId}`);
+  const handleSuggestionClick = (movie) => {
+    navigate(`/movie/${movie.imdbID}`, { state: { movie } });
     dispatch(clearSearchResults());
     setQuery('');
     setIsOpen(false);
@@ -109,7 +109,7 @@ const SearchBar = () => {
             <button
               key={movie.imdbID}
               type="button"
-              onClick={() => handleSuggestionClick(movie.imdbID)}
+              onClick={() => handleSuggestionClick(movie)}
               className="flex w-full items-center gap-3 p-3 text-left transition hover:bg-gray-800"
             >
               <img

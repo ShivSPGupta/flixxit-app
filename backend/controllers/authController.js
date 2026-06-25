@@ -21,7 +21,7 @@ const buildUserResponse = (user) => ({
   createdAt: user.createdAt,
 });
 
-exports.register = async (req, res) => {
+exports.register = async (req, res, next) => {
   try {
     const { email, password, displayName } = req.body;
     const normalizedEmail = normalizeEmail(email);
@@ -66,15 +66,11 @@ exports.register = async (req, res) => {
       refreshToken,
     });
   } catch (error) {
-    console.error("Register error:", error);
-    res.status(500).json({
-      message: "Server error",
-      error: error.message,
-    });
+    next(error);
   }
 };
 
-exports.login = async (req, res) => {
+exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const normalizedEmail = normalizeEmail(email);
@@ -111,11 +107,7 @@ exports.login = async (req, res) => {
       refreshToken,
     });
   } catch (error) {
-    console.error("Login error:", error);
-    res.status(500).json({
-      message: "Server error",
-      error: error.message,
-    });
+    next(error);
   }
 };
 
@@ -147,7 +139,7 @@ exports.refreshToken = async (req, res) => {
   }
 };
 
-exports.updateEmail = async (req, res) => {
+exports.updateEmail = async (req, res, next) => {
   try {
     const { email } = req.body;
     const normalizedEmail = normalizeEmail(email);
@@ -176,11 +168,11 @@ exports.updateEmail = async (req, res) => {
       ...buildUserResponse(req.user),
     });
   } catch (error) {
-    res.status(500).json({ message: "Server error" });
+    next(error);
   }
 };
 
-exports.updatePassword = async (req, res) => {
+exports.updatePassword = async (req, res, next) => {
   try {
     const { currentPassword, newPassword } = req.body;
 
@@ -213,11 +205,11 @@ exports.updatePassword = async (req, res) => {
 
     res.json({ message: "Password updated successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Server error" });
+    next(error);
   }
 };
 
-exports.updateProfile = async (req, res) => {
+exports.updateProfile = async (req, res, next) => {
   try {
     const { displayName, avatar } = req.body;
 
@@ -230,16 +222,16 @@ exports.updateProfile = async (req, res) => {
       ...buildUserResponse(req.user),
     });
   } catch (error) {
-    res.status(500).json({ message: "Server error" });
+    next(error);
   }
 };
 
-exports.deleteAccount = async (req, res) => {
+exports.deleteAccount = async (req, res, next) => {
   try {
     await User.findByIdAndDelete(req.user._id);
     res.json({ message: "Account deleted successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Server error" });
+    next(error);
   }
 };
 

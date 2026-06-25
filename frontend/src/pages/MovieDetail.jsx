@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { getMovieDetail, clearMovieDetail } from '../redux/slices/moviesSlice';
 import { addToFavorites, removeFromFavorites } from '../redux/slices/favoritesSlice';
@@ -9,11 +9,56 @@ import { resolvePosterUrl, posterFallback } from '../utils/posterUrl';
 const MovieDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
-  const { movieDetail, detail } = useSelector((state) => state.movies);
+  const { movieDetail, detail, rows, searchResults } = useSelector((state) => state.movies);
   const { list } = useSelector((state) => state.favorites);
   const [playTrailer, setPlayTrailer] = useState(false);
-  const posterUrl = resolvePosterUrl(movieDetail?.Poster, posterFallback);
+
+  const normalizeFallbackMovie = (movie) => {
+    if (!movie) return null;
+
+    return {
+      imdbID: String(movie.imdbID || id),
+      Title: movie.Title || movie.title || 'Untitled',
+      Year: movie.Year || 'N/A',
+      Poster: movie.Poster || movie.poster || 'N/A',
+      Plot: movie.Plot || 'Details are temporarily limited for this title.',
+      imdbRating: 'N/A',
+      Runtime: 'N/A',
+      Rated: 'N/A',
+      Released: movie.Year || 'N/A',
+      Director: 'N/A',
+      Writer: 'N/A',
+      Actors: 'N/A',
+      Genre: 'N/A',
+      Language: 'N/A',
+      Country: 'N/A',
+      BoxOffice: 'N/A',
+      Awards: 'N/A',
+      isPartialDetail: true,
+    };
+  };
+
+  const findCachedMovie = () => {
+    const navigationMovie = normalizeFallbackMovie(location.state?.movie);
+    if (navigationMovie) return navigationMovie;
+
+    const rowMovie = Object.values(rows)
+      .flatMap((row) => (Array.isArray(row) ? row : []))
+      .find((movie) => String(movie.imdbID) === String(id));
+    if (rowMovie) return normalizeFallbackMovie(rowMovie);
+
+    const searchMovie = searchResults.find((movie) => String(movie.imdbID) === String(id));
+    if (searchMovie) return normalizeFallbackMovie(searchMovie);
+
+    const favoriteMovie = list.find((movie) => String(movie.imdbID) === String(id));
+    return normalizeFallbackMovie(favoriteMovie);
+  };
+
+  const fallbackMovie = findCachedMovie();
+  const displayedMovie = movieDetail || (detail.isError ? fallbackMovie : null);
+  const posterUrl = resolvePosterUrl(displayedMovie?.Poster, posterFallback);
 
   useEffect(() => {
     dispatch(getMovieDetail(id));
@@ -22,7 +67,7 @@ const MovieDetail = () => {
     };
   }, [id, dispatch]);
 
-  if (detail.isError) {
+  if (detail.isError && !displayedMovie) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center px-4">
         <div className="max-w-md w-full text-center">
@@ -49,7 +94,7 @@ const MovieDetail = () => {
     );
   }
 
-  if (detail.isLoading || !movieDetail) {
+  if (!displayedMovie) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-white"></div>
@@ -57,16 +102,16 @@ const MovieDetail = () => {
     );
   }
 
-  const isInList = list.some(item => item.imdbID === movieDetail.imdbID);
+  const isInList = list.some(item => item.imdbID === displayedMovie.imdbID);
 
   const handleToggleList = () => {
     if (isInList) {
-      dispatch(removeFromFavorites(movieDetail.imdbID));
+      dispatch(removeFromFavorites(displayedMovie.imdbID));
     } else {
       dispatch(addToFavorites({
-        imdbID: movieDetail.imdbID,
-        title: movieDetail.Title,
-        poster: movieDetail.Poster
+        imdbID: displayedMovie.imdbID,
+        title: displayedMovie.Title,
+        poster: displayedMovie.Poster
       }));
     }
   };
@@ -78,10 +123,10 @@ const MovieDetail = () => {
       <div className="relative pt-16">
         {/* Hero Section */}
         <div className="relative h-[70vh]">
-          {playTrailer && movieDetail.trailerKey ? (
+          {playTrailer && displayedMovie.trailerKey ? (
             <iframe
-              src={`https://www.youtube.com/embed/${movieDetail.trailerKey}?autoplay=1`}
-              title={movieDetail.Title}
+              src={`https://www.youtube.com/embed/${displayedMovie.trailerKey}?autoplay=1`}
+              title={displayedMovie.Title}
               className="w-full h-full"
               frameBorder="0"
               allow="autoplay; encrypted-media"
@@ -91,7 +136,7 @@ const MovieDetail = () => {
             <>
               <img
                 src={posterUrl}
-                alt={movieDetail.Title}
+                alt={displayedMovie.Title}
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent" />
@@ -100,20 +145,26 @@ const MovieDetail = () => {
           
           <div className="absolute bottom-0 left-0 right-0 px-4 md:px-12 pb-12">
             <h1 className="text-4xl md:text-6xl font-bold mb-4">
-              {movieDetail.Title}
+              {displayedMovie.Title}
             </h1>
             
             <div className="flex items-center space-x-4 mb-4">
               <span className="text-green-500 font-semibold">
-                {movieDetail.imdbRating}/10
+                {displayedMovie.imdbRating}/10
               </span>
-              <span>{movieDetail.Year}</span>
-              <span>{movieDetail.Runtime}</span>
-              <span className="border border-gray-400 px-2">{movieDetail.Rated}</span>
+              <span>{displayedMovie.Year}</span>
+              <span>{displayedMovie.Runtime}</span>
+              <span className="border border-gray-400 px-2">{displayedMovie.Rated}</span>
             </div>
+
+            {displayedMovie.isPartialDetail && (
+              <p className="max-w-2xl text-sm text-yellow-200 bg-yellow-500/10 border border-yellow-500/30 rounded px-3 py-2 mb-4">
+                Showing limited cached details because the movie service is temporarily slow.
+              </p>
+            )}
             
             <div className="flex space-x-3">
-              {movieDetail.trailerKey && (
+              {displayedMovie.trailerKey && (
                 <button
                   onClick={() => setPlayTrailer(!playTrailer)}
                   className="flex items-center bg-white text-black px-6 py-3 rounded hover:bg-gray-200 transition font-semibold"
@@ -146,25 +197,25 @@ const MovieDetail = () => {
             <div className="md:col-span-2">
               <h2 className="text-2xl font-semibold mb-4">Overview</h2>
               <p className="text-gray-300 leading-relaxed mb-6">
-                {movieDetail.Plot}
+                {displayedMovie.Plot}
               </p>
               
               <div className="space-y-2">
                 <div>
                   <span className="text-gray-400">Director:</span>{' '}
-                  <span>{movieDetail.Director}</span>
+                  <span>{displayedMovie.Director}</span>
                 </div>
                 <div>
                   <span className="text-gray-400">Writers:</span>{' '}
-                  <span>{movieDetail.Writer}</span>
+                  <span>{displayedMovie.Writer}</span>
                 </div>
                 <div>
                   <span className="text-gray-400">Stars:</span>{' '}
-                  <span>{movieDetail.Actors}</span>
+                  <span>{displayedMovie.Actors}</span>
                 </div>
                 <div>
                   <span className="text-gray-400">Genre:</span>{' '}
-                  <span>{movieDetail.Genre}</span>
+                  <span>{displayedMovie.Genre}</span>
                 </div>
               </div>
             </div>
@@ -174,23 +225,23 @@ const MovieDetail = () => {
               <div className="space-y-3">
                 <div>
                   <span className="text-gray-400">Released:</span>{' '}
-                  <span>{movieDetail.Released}</span>
+                  <span>{displayedMovie.Released}</span>
                 </div>
                 <div>
                   <span className="text-gray-400">Language:</span>{' '}
-                  <span>{movieDetail.Language}</span>
+                  <span>{displayedMovie.Language}</span>
                 </div>
                 <div>
                   <span className="text-gray-400">Country:</span>{' '}
-                  <span>{movieDetail.Country}</span>
+                  <span>{displayedMovie.Country}</span>
                 </div>
                 <div>
                   <span className="text-gray-400">Box Office:</span>{' '}
-                  <span>{movieDetail.BoxOffice || 'N/A'}</span>
+                  <span>{displayedMovie.BoxOffice || 'N/A'}</span>
                 </div>
                 <div>
                   <span className="text-gray-400">Awards:</span>{' '}
-                  <span>{movieDetail.Awards}</span>
+                  <span>{displayedMovie.Awards}</span>
                 </div>
               </div>
             </div>

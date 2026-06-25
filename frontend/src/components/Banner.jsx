@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { getMovieRow } from '../redux/slices/moviesSlice';
@@ -16,7 +16,7 @@ const Banner = () => {
     dispatch(getMovieRow({ keyword: 'trending' }));
   }, [dispatch]);
 
-  const bannerMovies = rows.trending || [];
+  const bannerMovies = useMemo(() => rows.trending || [], [rows]);
 
   useEffect(() => {
     if (!bannerMovies.length) return;
@@ -62,7 +62,7 @@ const Banner = () => {
       }}
     >
       <div className="absolute inset-0 bg-black/20" />
-      <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent" />
+      <div className="absolute inset-0 bg-linear-to-r from-black via-black/70 to-transparent" />
       
       <div className="relative flex min-h-[70vh] flex-col justify-end px-4 pb-20 pt-28 sm:pb-24 md:px-12 md:pt-0">
         <div className="max-w-2xl transition-opacity duration-700">
@@ -72,7 +72,7 @@ const Banner = () => {
         
           <div className="mt-5 flex flex-col gap-3 sm:flex-row">
             <button
-              onClick={() => navigate(`/movie/${movie.imdbID}`)}
+              onClick={() => navigate(`/movie/${movie.imdbID}`, { state: { movie } })}
               className="inline-flex items-center justify-center bg-white px-6 py-3 font-semibold text-black transition hover:bg-gray-200"
             >
               <svg className="mr-2 h-6 w-6" fill="currentColor" viewBox="0 0 20 20">
@@ -117,7 +117,7 @@ const Banner = () => {
         )}
       </div>
       
-      <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent" />
+      <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-32 bg-linear-to-t from-black to-transparent" />
     </header>
   );
 };

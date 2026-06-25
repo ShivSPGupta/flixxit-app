@@ -275,6 +275,38 @@ const mapMovieDetail = (movie) => {
   };
 };
 
+const mapSummaryToPartialDetail = (movie) => ({
+  imdbID: String(movie.imdbID),
+  Title: movie.Title || 'Untitled',
+  Year: movie.Year || 'N/A',
+  Poster: movie.Poster || 'N/A',
+  Plot: movie.Plot || 'No plot available.',
+  imdbRating: 'N/A',
+  Runtime: 'N/A',
+  Rated: 'N/A',
+  Released: movie.Year || 'N/A',
+  Director: 'N/A',
+  Writer: 'N/A',
+  Actors: 'N/A',
+  Genre: 'N/A',
+  Language: 'N/A',
+  Country: 'N/A',
+  BoxOffice: 'N/A',
+  Awards: 'N/A',
+  isPartialDetail: true,
+});
+
+const dbCacheFindMovieSummary = async (movieId) => {
+  const entry = await TmdbCache.findOne({
+    cacheKey: /^(row|search):/,
+    'payload.Search.imdbID': String(movieId),
+  })
+    .sort({ updatedAt: -1 })
+    .lean();
+
+  return entry?.payload?.Search?.find((movie) => String(movie.imdbID) === String(movieId));
+};
+
 const ensureApiKey = () => {
   if (!API_KEY) {
     throw new Error('TMDB_API_KEY is missing');
@@ -348,22 +380,45 @@ exports.getMovieDetails = async (movieId) => {
   const cacheKey = `detail:${movieId}`;
   debugLog('getMovieDetails request:', { movieId, cacheKey });
 
-  return fetchWithCache(cacheKey, DETAIL_TTL, async () => {
-    try {
-      const response = await tmdbGet(`/movie/${movieId}`, {
-        api_key: API_KEY,
-        append_to_response: 'credits,release_dates',
-      }, '/movie/:id');
+  try {
+    return await fetchWithCache(cacheKey, DETAIL_TTL, async () => {
+      try {
+        const response = await tmdbGet(`/movie/${movieId}`, {
+          api_key: API_KEY,
+          append_to_response: 'credits,release_dates',
+        }, '/movie/:id');
 
-      return mapMovieDetail(response.data);
-    } catch (error) {
-      if (isNetworkError(error)) {
-        return null;
+        return mapMovieDetail(response.data);
+      } catch (error) {
+        if (error.response?.status === 404) {
+          return null;
+        }
+
+        if (isRetryableTmdbError(error)) {
+          throw error;
+        }
+
+        throw new Error('TMDb API error: ' + error.message);
+      }
+    });
+  } catch (error) {
+    if (isRetryableTmdbError(error)) {
+      try {
+        const cachedSummary = await dbCacheFindMovieSummary(movieId);
+
+        if (cachedSummary) {
+          debugLog('Serving partial detail from cached row/search data:', movieId);
+          return mapSummaryToPartialDetail(cachedSummary);
+        }
+      } catch (fallbackError) {
+        console.error('TMDb partial detail fallback error:', fallbackError.message);
       }
 
-      throw new Error('TMDb API error: ' + error.message);
+      return null;
     }
-  });
+
+    throw error;
+  }
 };
 
 exports.getMoviesByKeyword = async (keyword, page = 1) => {

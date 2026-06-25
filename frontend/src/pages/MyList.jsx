@@ -46,7 +46,15 @@ const MyList = () => {
             {uniqueList.map((movie) => (
               <div key={movie.imdbID} className="relative group">
                 <div
-                  onClick={() => navigate(`/movie/${movie.imdbID}`)}
+                  onClick={() => navigate(`/movie/${movie.imdbID}`, {
+                    state: {
+                      movie: {
+                        imdbID: movie.imdbID,
+                        Title: movie.title,
+                        Poster: movie.poster,
+                      },
+                    },
+                  })}
                   className="cursor-pointer transition-transform hover:scale-105"
                 >
                   <img

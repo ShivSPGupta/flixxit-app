@@ -48,7 +48,7 @@ const SearchResults = () => {
             {uniqueResults.map((movie) => (
               <div
                 key={movie.imdbID}
-                onClick={() => navigate(`/movie/${movie.imdbID}`)}
+                onClick={() => navigate(`/movie/${movie.imdbID}`, { state: { movie } })}
                 className="cursor-pointer transition-transform hover:scale-105"
               >
                 <img
