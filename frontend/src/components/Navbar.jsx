@@ -10,6 +10,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
+  const accountName = user?.displayName || user?.email || "Account";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -78,7 +79,13 @@ const Navbar = () => {
             </button>
 
             {showMenu && (
-              <div className="absolute right-0 mt-2 w-48 bg-black/90 border border-gray-700 rounded shadow-lg">
+              <div className="absolute right-0 mt-2 w-56 bg-black/90 border border-gray-700 rounded shadow-lg">
+                <div className="border-b border-gray-700 px-4 py-3">
+                  <p className="truncate font-semibold text-white">{accountName}</p>
+                  {user?.displayName && (
+                    <p className="truncate text-sm text-gray-400">{user.email}</p>
+                  )}
+                </div>
                 <Link
                   to="/profile"
                   className="block px-4 py-2 hover:bg-gray-800 transition"

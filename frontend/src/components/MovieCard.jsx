@@ -60,7 +60,7 @@ const MovieCard = ({ movie, isLarge = false }) => {
 
   return (
     <div
-      className="relative flex-shrink-0 cursor-pointer transition-transform hover:scale-105 hover:z-10"
+      className="relative shrink-0 cursor-pointer transition-transform hover:scale-105 hover:z-10"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       style={{
@@ -82,7 +82,7 @@ const MovieCard = ({ movie, isLarge = false }) => {
         <TrailerHover movie={movie} />
       )}
 
-      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-3 opacity-0 hover:opacity-100 transition-opacity">
+      <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black to-transparent p-3 opacity-0 hover:opacity-100 transition-opacity">
         <h3 className="font-semibold text-sm mb-2 line-clamp-2">{movie.Title}</h3>
         <div className="flex items-center justify-between">
           <button

@@ -139,7 +139,7 @@ const MovieDetail = () => {
                 alt={displayedMovie.Title}
                 className="w-full h-full object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent" />
+              <div className="absolute inset-0 bg-linear-to-r from-black via-black/70 to-transparent" />
             </>
           )}
           
@@ -169,9 +169,15 @@ const MovieDetail = () => {
                   onClick={() => setPlayTrailer(!playTrailer)}
                   className="flex items-center bg-white text-black px-6 py-3 rounded hover:bg-gray-200 transition font-semibold"
                 >
-                  <svg className="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
-                  </svg>
+                  {playTrailer ? (
+                    <svg className="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M5 5.5A1.5 1.5 0 016.5 4h7A1.5 1.5 0 0115 5.5v7a1.5 1.5 0 01-1.5 1.5h-7A1.5 1.5 0 015 12.5v-7z" />
+                    </svg>
+                  ) : (
+                    <svg className="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                    </svg>
+                  )}
                   {playTrailer ? 'Stop' : 'Play Trailer'}
                 </button>
               )}

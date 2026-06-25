@@ -17,7 +17,7 @@ Flixxit is a full-stack Netflix-style movie app built with React, Redux Toolkit,
 - Search page with backend cache-first TMDb search
 - Quota-safe search bar suggestions from already-loaded Redux rows
 - My List favorites stored in MongoDB
-- Profile page with member-since account details
+- Profile page with display name, avatar, member-since account details, and inline update feedback
 - Responsive navbar, search suggestions, banner, rows, cards, and detail page
 
 ## Tech Stack
@@ -336,6 +336,8 @@ stored user data is safely parsed from localStorage
 broken localStorage auth data is cleared automatically
 protected routes require a valid stored token
 login/register errors are shown inline instead of browser alerts
+profile/email/password updates use inline success and error feedback
+display name is shown in the navbar account menu and profile header
 ```
 
 Backend behavior:
@@ -355,6 +357,20 @@ POST /api/auth/refresh
 ```
 
 The frontend Axios interceptor calls the refresh endpoint automatically when an authenticated request receives an expired-token response.
+
+## Profile Behavior
+
+Users can manage:
+
+```text
+display name
+avatar URL
+email address
+password
+account deletion
+```
+
+Profile updates are validated on the frontend and backend. Display names are limited to 40 characters and are shown in the navbar dropdown and profile header, with email as a fallback.
 
 ## Deployment Notes
 
@@ -405,6 +421,15 @@ cd frontend
 npm run build
 ```
 
+Frontend dev server:
+
+```bash
+cd frontend
+npm run dev
+```
+
+`frontend/vite.config.js` pins local dev to `localhost:5173` and configures Vite HMR WebSocket settings for local development. This only affects `npm run dev`; production builds do not use Vite HMR.
+
 Backend start:
 
 ```bash
@@ -426,6 +451,7 @@ npm run dev
 - Some networks may block specific TMDb or YouTube endpoints.
 - YouTube Data API quota can be limited, so trailer keys are cached aggressively.
 - Chrome may still show a red `503` network entry if TMDb is unreachable, but the UI can fall back to cached/basic movie data when available.
+- Vite WebSocket/HMR messages are development-only and do not affect production builds.
 - If stale movie rows show old poster URLs, clear the `tmdbcaches` collection or wait for TTL expiry.
 
 ## Author

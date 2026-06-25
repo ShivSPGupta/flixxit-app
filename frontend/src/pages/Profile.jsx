@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
@@ -13,9 +13,11 @@ import Navbar from '../components/Navbar';
 const Profile = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { user, isSuccess, message } = useSelector((state) => state.auth);
+  const { user, isLoading } = useSelector((state) => state.auth);
 
   const [activeTab, setActiveTab] = useState('profile');
+  const [formError, setFormError] = useState('');
+  const [formSuccess, setFormSuccess] = useState('');
   const [profileData, setProfileData] = useState({
     displayName: user?.displayName || '',
     avatar: user?.avatar || '',
@@ -32,47 +34,92 @@ const Profile = () => {
   const memberSince = user?.createdAt
     ? new Date(user.createdAt).toLocaleDateString()
     : 'Not available';
+  const accountName = user?.displayName || user?.email || 'Flixxit User';
 
-  useEffect(() => {
-    if (isSuccess && message) {
-      alert(message);
-      dispatch(reset());
+  const clearFeedback = () => {
+    setFormError('');
+    setFormSuccess('');
+    dispatch(reset());
+  };
+
+  const handleTabChange = (tab) => {
+    clearFeedback();
+    setActiveTab(tab);
+  };
+
+  const handleProfileUpdate = async (e) => {
+    e.preventDefault();
+    clearFeedback();
+
+    const displayName = profileData.displayName.trim();
+    const avatar = profileData.avatar.trim();
+
+    if (displayName.length > 40) {
+      setFormError('Display name must be 40 characters or less');
+      return;
     }
-  }, [isSuccess, message, dispatch]);
 
-  const handleProfileUpdate = (e) => {
-    e.preventDefault();
-    dispatch(updateProfile(profileData));
+    try {
+      await dispatch(updateProfile({ displayName, avatar })).unwrap();
+      setFormSuccess('Profile updated successfully');
+    } catch (error) {
+      setFormError(error || 'Failed to update profile');
+    }
   };
 
-  const handleEmailUpdate = (e) => {
+  const handleEmailUpdate = async (e) => {
     e.preventDefault();
-    dispatch(updateEmail(emailData));
+    clearFeedback();
+
+    const email = emailData.email.trim().toLowerCase();
+
+    if (!email) {
+      setFormError('Email is required');
+      return;
+    }
+
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      setFormError('Please provide a valid email');
+      return;
+    }
+
+    try {
+      await dispatch(updateEmail({ email })).unwrap();
+      setFormSuccess('Email updated successfully');
+    } catch (error) {
+      setFormError(error || 'Failed to update email');
+    }
   };
 
-  const handlePasswordUpdate = (e) => {
+  const handlePasswordUpdate = async (e) => {
     e.preventDefault();
+    clearFeedback();
     
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert('New passwords do not match');
+      setFormError('New passwords do not match');
       return;
     }
 
     if (passwordData.newPassword.length < 6) {
-      alert('New password must be at least 6 characters');
+      setFormError('New password must be at least 6 characters');
       return;
     }
 
-    dispatch(updatePassword({
-      currentPassword: passwordData.currentPassword,
-      newPassword: passwordData.newPassword,
-    }));
+    try {
+      await dispatch(updatePassword({
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword,
+      })).unwrap();
 
-    setPasswordData({
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: '',
-    });
+      setPasswordData({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+      });
+      setFormSuccess('Password updated successfully');
+    } catch (error) {
+      setFormError(error || 'Failed to update password');
+    }
   };
 
   const handleDeleteAccount = async () => {
@@ -85,7 +132,8 @@ const Profile = () => {
       await dispatch(deleteAccount()).unwrap();
       navigate('/login');
     } catch (error) {
-      alert(error || 'Failed to delete account. Please try again.');
+      setFormError(error || 'Failed to delete account. Please try again.');
+      setFormSuccess('');
     }
   };
 
@@ -95,11 +143,23 @@ const Profile = () => {
       
       <div className="pt-24 px-4 md:px-12 max-w-4xl mx-auto">
         <h1 className="text-4xl font-bold mb-8">Account Settings</h1>
+
+        {formSuccess && (
+          <div className="mb-6 rounded border border-green-600 bg-green-600/15 px-4 py-3 text-green-200">
+            {formSuccess}
+          </div>
+        )}
+
+        {formError && (
+          <div className="mb-6 rounded border border-red-600 bg-red-600/15 px-4 py-3 text-red-200">
+            {formError}
+          </div>
+        )}
         
         {/* Tabs */}
         <div className="flex space-x-4 mb-8 border-b border-gray-700">
           <button
-            onClick={() => setActiveTab('profile')}
+            onClick={() => handleTabChange('profile')}
             className={`pb-4 px-4 ${
               activeTab === 'profile'
                 ? 'border-b-2 border-netflix text-white'
@@ -109,7 +169,7 @@ const Profile = () => {
             Profile
           </button>
           <button
-            onClick={() => setActiveTab('email')}
+            onClick={() => handleTabChange('email')}
             className={`pb-4 px-4 ${
               activeTab === 'email'
                 ? 'border-b-2 border-netflix text-white'
@@ -119,7 +179,7 @@ const Profile = () => {
             Email
           </button>
           <button
-            onClick={() => setActiveTab('password')}
+            onClick={() => handleTabChange('password')}
             className={`pb-4 px-4 ${
               activeTab === 'password'
                 ? 'border-b-2 border-netflix text-white'
@@ -129,7 +189,7 @@ const Profile = () => {
             Password
           </button>
           <button
-            onClick={() => setActiveTab('danger')}
+            onClick={() => handleTabChange('danger')}
             className={`pb-4 px-4 ${
               activeTab === 'danger'
                 ? 'border-b-2 border-netflix text-white'
@@ -150,7 +210,10 @@ const Profile = () => {
                 className="w-24 h-24 rounded"
               />
               <div>
-                <h3 className="text-xl font-semibold">{user?.email}</h3>
+                <h3 className="text-xl font-semibold">{accountName}</h3>
+                {user?.displayName && (
+                  <p className="text-gray-400">{user.email}</p>
+                )}
                 <p className="text-gray-400">Member since {memberSince}</p>
               </div>
             </div>
@@ -160,9 +223,16 @@ const Profile = () => {
               <input
                 type="text"
                 value={profileData.displayName}
-                onChange={(e) => setProfileData({ ...profileData, displayName: e.target.value })}
+                onChange={(e) => {
+                  clearFeedback();
+                  setProfileData({ ...profileData, displayName: e.target.value });
+                }}
+                maxLength={40}
                 className="w-full bg-gray-800 border border-gray-700 rounded px-4 py-2 focus:outline-none focus:border-white"
               />
+              <p className="mt-1 text-sm text-gray-400">
+                {profileData.displayName.length}/40 characters
+              </p>
             </div>
             
             <div>
@@ -170,16 +240,20 @@ const Profile = () => {
               <input
                 type="url"
                 value={profileData.avatar}
-                onChange={(e) => setProfileData({ ...profileData, avatar: e.target.value })}
+                onChange={(e) => {
+                  clearFeedback();
+                  setProfileData({ ...profileData, avatar: e.target.value });
+                }}
                 className="w-full bg-gray-800 border border-gray-700 rounded px-4 py-2 focus:outline-none focus:border-white"
               />
             </div>
             
             <button
               type="submit"
-              className="bg-netflix hover:bg-red-700 text-white px-6 py-2 rounded transition"
+              disabled={isLoading}
+              className="bg-netflix hover:bg-red-700 text-white px-6 py-2 rounded transition disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Save Changes
+              {isLoading ? 'Saving...' : 'Save Changes'}
             </button>
           </form>
         )}
@@ -192,7 +266,11 @@ const Profile = () => {
               <input
                 type="email"
                 value={emailData.email}
-                onChange={(e) => setEmailData({ email: e.target.value })}
+                onChange={(e) => {
+                  clearFeedback();
+                  setEmailData({ email: e.target.value });
+                }}
+                autoComplete="email"
                 className="w-full bg-gray-800 border border-gray-700 rounded px-4 py-2 focus:outline-none focus:border-white"
                 required
               />
@@ -200,9 +278,10 @@ const Profile = () => {
             
             <button
               type="submit"
-              className="bg-netflix hover:bg-red-700 text-white px-6 py-2 rounded transition"
+              disabled={isLoading}
+              className="bg-netflix hover:bg-red-700 text-white px-6 py-2 rounded transition disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Update Email
+              {isLoading ? 'Updating...' : 'Update Email'}
             </button>
           </form>
         )}
@@ -215,7 +294,11 @@ const Profile = () => {
               <input
                 type="password"
                 value={passwordData.currentPassword}
-                onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                onChange={(e) => {
+                  clearFeedback();
+                  setPasswordData({ ...passwordData, currentPassword: e.target.value });
+                }}
+                autoComplete="current-password"
                 className="w-full bg-gray-800 border border-gray-700 rounded px-4 py-2 focus:outline-none focus:border-white"
                 required
               />
@@ -226,7 +309,11 @@ const Profile = () => {
               <input
                 type="password"
                 value={passwordData.newPassword}
-                onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                onChange={(e) => {
+                  clearFeedback();
+                  setPasswordData({ ...passwordData, newPassword: e.target.value });
+                }}
+                autoComplete="new-password"
                 className="w-full bg-gray-800 border border-gray-700 rounded px-4 py-2 focus:outline-none focus:border-white"
                 required
                 minLength={6}
@@ -238,7 +325,11 @@ const Profile = () => {
               <input
                 type="password"
                 value={passwordData.confirmPassword}
-                onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                onChange={(e) => {
+                  clearFeedback();
+                  setPasswordData({ ...passwordData, confirmPassword: e.target.value });
+                }}
+                autoComplete="new-password"
                 className="w-full bg-gray-800 border border-gray-700 rounded px-4 py-2 focus:outline-none focus:border-white"
                 required
                 minLength={6}
@@ -247,9 +338,10 @@ const Profile = () => {
             
             <button
               type="submit"
-              className="bg-netflix hover:bg-red-700 text-white px-6 py-2 rounded transition"
+              disabled={isLoading}
+              className="bg-netflix hover:bg-red-700 text-white px-6 py-2 rounded transition disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Change Password
+              {isLoading ? 'Changing...' : 'Change Password'}
             </button>
           </form>
         )}
