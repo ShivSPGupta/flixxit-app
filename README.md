@@ -58,6 +58,7 @@ backend/
   middleware/
   models/
   routes/
+  services/
   utils/
 frontend/
   public/
@@ -84,12 +85,14 @@ TMDB_API_KEY=your_tmdb_api_key
 YOUTUBE_API_KEY=your_youtube_api_key
 CORS_ORIGIN=http://localhost:5173,https://your-frontend-domain.com
 NODE_ENV=development
+TRUST_PROXY=1
 ```
 
 Optional debugging:
 
 ```env
 DEBUG_TMDB=true
+DEBUG_LOGS=movies,tmdb
 ```
 
 ### Frontend
@@ -201,6 +204,8 @@ backend/middleware/errorHandler.js
 ```
 
 Unknown routes return a consistent `404` response, and production server errors hide stack traces.
+
+Each request receives an `x-request-id` through `backend/utils/requestContext.js`. Debug logs use this request id so controller and TMDb utility logs can be traced together.
 
 ## Caching Behavior
 

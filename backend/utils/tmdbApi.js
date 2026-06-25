@@ -1,6 +1,6 @@
 const axios = require('axios');
 const TmdbCache = require('../models/TmdbCache');
-const { getRequestId } = require('./requestContext');
+const { createLogger } = require('./logger');
 
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
@@ -12,16 +12,12 @@ const SEARCH_TTL = 12 * 60 * 60 * 1000;
 const DETAIL_TTL = 7 * 24 * 60 * 60 * 1000;
 const TRENDING_TTL = 30 * 60 * 1000;
 const ROW_TTL = 6 * 60 * 60 * 1000;
-const DEBUG_TMDB = process.env.DEBUG_TMDB === 'true';
+const logger = createLogger('tmdb');
 
 const responseCache = new Map();
 const inFlightRequests = new Map();
 
-const debugLog = (...args) => {
-  if (DEBUG_TMDB) {
-    console.log(`[TMDB][${getRequestId()}]`, ...args);
-  }
-};
+const debugLog = (...args) => logger.debug(...args);
 
 const normalizeCacheKey = (value) => String(value || '').trim().toLowerCase().replace(/\s+/g, ' ');
 

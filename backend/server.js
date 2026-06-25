@@ -4,15 +4,21 @@ const cors = require('cors');
 const helmet = require('helmet');
 const connectDB = require('./config/db');
 const { errorHandler, notFound } = require('./middleware/errorHandler');
+const { requestContextMiddleware } = require('./utils/requestContext');
 
 dotenv.config();
 
 const app = express();
 
+// Render and similar hosts sit behind a reverse proxy that sets X-Forwarded-For.
+// This lets express-rate-limit use the real client IP instead of throwing proxy warnings.
+app.set('trust proxy', Number(process.env.TRUST_PROXY || 1));
+
 // Connect to MongoDB
 connectDB();
 
 // Middleware
+app.use(requestContextMiddleware);
 app.use(helmet());
 
 const allowedOrigins = (
